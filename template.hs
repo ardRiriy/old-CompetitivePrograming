@@ -53,9 +53,16 @@ main = do
   -----------------------------------------------------------------------------
 
 --  | 各桁の総和を求める関数．入力はDouble
-adder:: Double -> Int
+adder :: Double -> Int
 adder n
     | n < 10 = m
     | otherwise = mod m 10 + adder (n/10)
     where
         m = truncate n
+
+--  | qsort.大きい順に並べる
+qsort :: [Int] -> [Int]
+qsort [] = []
+qsort (p:xs) = qsort smaller ++ [p] ++ qsort larger
+    where smaller = [x | x <- xs, x >= p ]
+          larger  = [x | x <- xs, x < p]
