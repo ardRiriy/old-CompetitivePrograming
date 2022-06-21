@@ -1,6 +1,6 @@
 main = do
     n <- readLn :: IO Int
-    -- | Floatで読み込むと大きい数字を扱う時に死ぬ
+    --  | aaa
     ns <- map read . words <$> getLine :: IO [Double]
     print $ check ns 0
 
