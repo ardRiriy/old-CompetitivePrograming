@@ -14,5 +14,5 @@ ten n
 
 one :: Int -> Int
 one n
-    | n == 1 = 1
+    | n == 1    = 1
     | otherwise = 0
