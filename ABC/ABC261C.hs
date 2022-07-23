@@ -1,4 +1,6 @@
 import Control.Monad
+
+-- | TLEで死ぬ
 main = do
     n <- readLn :: IO Int
     xs <- replicateM n getLine :: IO [String]
