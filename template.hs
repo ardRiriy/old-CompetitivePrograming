@@ -1,4 +1,5 @@
 import qualified Data.ByteString.Char8 as BS
+import Control.Monad
 
 main = do
   --  | 標準入力から一行読み込む
@@ -51,6 +52,7 @@ main = do
   putStrLn . unwords . map show $ (ns :: [Int])
 
   -----------------------------------------------------------------------------
+
 
 --  | 各桁の総和を求める関数．入力はDouble
 adder :: Double -> Int
