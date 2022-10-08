@@ -8,7 +8,6 @@ int main() {
   cout << "いつも << 252 << endl;
   cout << "AtCoderくん"　<< endl
 }
-
 */
 
 #include <bits/stdc++.h>
