@@ -11,6 +11,21 @@ int main() {
   for (int i = 0; i < m; i++) {
     for (int j = 0; j < n; j++) cin >> vec[i][j];
   } */
+  int n;
+  cin >> n;
+
+  vector<int> vec(5 * n);
+  int tmp;
+  for (int i = 0; i < 5 * n; i++) cin >> vec[i];
+  sort(vec.begin(), vec.end());
+  for (int i = 0; i < n; i++) {
+    vec.pop_back();
+    vec.erase(vec.begin());
+  }
+  int sum = 0;
+  for (int i = 0; i < (3 * n); i++) sum += vec[i];
+  std::cout << std::fixed;
+  cout << setprecision(7) << (float)sum / (3 * n) << endl;
 
   return 0;
 }

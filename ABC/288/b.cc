@@ -6,13 +6,20 @@
 using namespace std;
 
 int main() {
-  /* // m*nの2重配列への標準入力
-  vector<vector<int>> vec(m, vector<int>(n));
-  for (int i = 0; i < m; i++) {
-    for (int j = 0; j < n; j++) cin >> vec[i][j];
-  } */
+  int n, k;
+  cin >> n >> k;
+  vector<string> vec(n);
+  for (int i = 0; i < n; i++) {
+    cin >> vec[i];
+  }
+  for (int i = 0; i < (n - k); i++) {
+    vec.pop_back();
+  }
 
-  return 0;
+  sort(vec.begin(), vec.end());
+  for (int i = 0; i < k; i++) {
+    cout << vec[i] << endl;
+  }
 }
 
 /* // vectorの中に期待する要素が含まれているかを返す

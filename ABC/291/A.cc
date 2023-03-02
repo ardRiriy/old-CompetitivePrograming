@@ -6,6 +6,16 @@
 using namespace std;
 
 int main() {
+  string s;
+  cin >> s;
+  int ans = 1;
+  for (int i = 0; i < size(s); i++) {
+    if (s[i] >= 'A' && s[i] <= 'Z') {
+      cout << ans << endl;
+      break;
+    }
+    ans++;
+  }
   /* // m*nの2重配列への標準入力
   vector<vector<int>> vec(m, vector<int>(n));
   for (int i = 0; i < m; i++) {
