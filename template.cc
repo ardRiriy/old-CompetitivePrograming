@@ -2,6 +2,8 @@
 
 using namespace std;
 
+#define PRINT(x) cout << x << endl;
+
 int main() {
     /* // m*nの2重配列への標準入力
     vector<vector<int>> vec(m, vector<int>(n));
