@@ -9,7 +9,12 @@ int main() {
     int n;
     cin >> n;
 
-    LOOP(i, n) cout << char('A' + i);
+    vector<int> vec(n);
+
+    LOOP(i, n) cin >> vec[i];
+
+    cout << vec[0] << " ";
+
+    for (int i = 1; i < n; i++) cout << vec[i] - vec[i - 1] << " ";
     cout << endl;
-    return 0;
 }
