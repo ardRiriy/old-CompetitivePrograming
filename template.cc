@@ -1,11 +1,11 @@
 #include <bits/stdc++.h>
 
+#define int long long
+#define rep(i, n) for (int i = 0; i < (int)(n); i++)
+
 using namespace std;
 
-#define PRINT(x) cout << x << endl;
-#define LOOP(i, n) for (int i = 0; i < n; i++)
-
-int main() {
+signed main() {
     int n;
     return 0;
 }
