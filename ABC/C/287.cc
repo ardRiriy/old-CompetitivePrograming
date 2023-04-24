@@ -5,9 +5,8 @@
 
 using namespace std;
 
-/* /// @see
-///
-https://zenn.dev/reputeless/books/standard-cpp-for-competitive-programming/viewer/union-find
+/// @see
+/// https://zenn.dev/reputeless/books/standard-cpp-for-competitive-programming/viewer/union-find
 class UnionFind {
    public:
     UnionFind() = default;
@@ -61,9 +60,11 @@ class UnionFind {
     // m_parentsOrSize[i] は i の 親,
     // ただし root の場合は (-1 * そのグループに属する要素数)
     std::vector<int> m_parentsOrSize;
-}; */
+};
 
 signed main() {
-    int n;
+    int n, m;
+    cin >> n >> m;
+    
     return 0;
 }
