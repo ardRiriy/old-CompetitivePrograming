@@ -63,6 +63,26 @@ class UnionFind {
 };
 
 signed main() {
-    int n;
+    int n, m;
+    cin >> n >> m;
+
+    UnionFind uf(n);
+
+    int ans = 0;
+
+    while (m--) {
+        int a, b;
+        cin >> a >> b;
+        // 入力でa(b) = nが与えられるとRE(uf(n)は0~n-1まで)
+        a--;
+        b--;
+        if (uf.connected(a, b))
+            ans++;
+        else
+            uf.merge(a, b);
+    }
+
+    cout << ans << endl;
+
     return 0;
 }
