@@ -66,13 +66,24 @@ class UnionFind {
 signed main() {
     int n, m;
     cin >> n >> m;
-    int a[n];
+    string s[n];
+    string t[m];
+
+    rep(i, n) {
+        cin >> s[i];
+        s[i].erase(s[i].begin(), s[i].begin() + 3);
+    }
+    rep(i, m) cin >> t[i];
+
     int ans = 0;
-    rep(i, n) { cin >> a[i]; }
-    rep(i, m) {
-        int k;
-        cin >> k;
-        ans += a[k - 1];
+
+    rep(i, n) {
+        rep(j, m) {
+            if (s[i] == t[j]) {
+                ans += 1;
+                break;
+            }
+        }
     }
 
     cout << ans << endl;

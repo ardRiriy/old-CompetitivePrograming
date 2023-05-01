@@ -65,6 +65,25 @@ class UnionFind {
 signed main() {
     int n, m;
     cin >> n >> m;
-    
+    UnionFind uf(n + 1);
+
+    int edge[n + 1] = {0};
+    bool ed = true;
+
+    rep(i, m) {
+        int u, v;
+        cin >> u >> v;
+        uf.merge(u, v);
+        edge[u]++;
+        edge[v]++;
+        if (edge[u] > 2 || edge[v] > 2) {
+            ed = false;
+        }
+    }
+
+    if (uf.size(1) == n && m == n - 1 && ed)
+        cout << "Yes" << endl;
+    else
+        cout << "No" << endl;
     return 0;
 }

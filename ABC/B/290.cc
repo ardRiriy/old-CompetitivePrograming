@@ -64,17 +64,19 @@ class UnionFind {
 }; */
 
 signed main() {
-    int n, m;
-    cin >> n >> m;
-    int a[n];
-    int ans = 0;
-    rep(i, n) { cin >> a[i]; }
-    rep(i, m) {
-        int k;
-        cin >> k;
-        ans += a[k - 1];
-    }
+    int n, k;
+    cin >> n >> k;
+    string s;
+    cin >> s;
 
-    cout << ans << endl;
+    rep(i, n) {
+        if (s[i] == 'o') {
+            if (k > 0)
+                k--;
+            else
+                s[i] = 'x';
+        }
+    }
+    cout << s << endl;
     return 0;
 }
