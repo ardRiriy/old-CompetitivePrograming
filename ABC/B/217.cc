@@ -64,6 +64,23 @@ class UnionFind {
 }; */
 
 signed main() {
-    int n;
+    bool s[4] ={false};
+    rep(i, 3) {
+        string str;
+        cin >> str;
+        if(str == "ABC") s[0] = true;
+        else if(str == "ARC") s[1] = true;
+        else if(str == "AGC") s[2] = true;
+        else s[3] = true;
+    }
+    rep(i, 4){
+        if(!s[i]){
+            if(i == 0) cout << "ABC" << endl;
+            else if (i == 1) cout << "ARC" << endl;
+            else if (i == 2) cout << "AGC" << endl;
+            else cout << "AHC" << endl;
+        }
+    }
+
     return 0;
 }

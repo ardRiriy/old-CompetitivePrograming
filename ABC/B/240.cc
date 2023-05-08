@@ -65,5 +65,13 @@ class UnionFind {
 
 signed main() {
     int n;
+    cin >> n;
+    set<int> st;
+    rep(i, n) {
+        int k;
+        cin >> k;
+        st.insert(k);
+    }
+    cout << st.size() << endl;
     return 0;
 }

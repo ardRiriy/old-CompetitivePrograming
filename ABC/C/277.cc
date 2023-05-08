@@ -5,12 +5,10 @@
 
 using namespace std;
 
-/* /// @see
-///
-https://zenn.dev/reputeless/books/standard-cpp-for-competitive-programming/viewer/union-find
+/// @see
+///https://zenn.dev/reputeless/books/standard-cpp-for-competitive-programming/viewer/union-find
 class UnionFind {
-   public:
-    UnionFind() = default;
+    public: UnionFind() = default;
 
     /// @brief Union-Find 木を構築します。
     /// @param n 要素数
@@ -61,9 +59,29 @@ class UnionFind {
     // m_parentsOrSize[i] は i の 親,
     // ただし root の場合は (-1 * そのグループに属する要素数)
     std::vector<int> m_parentsOrSize;
-}; */
+};
 
 signed main() {
     int n;
+    cin >> n;
+    UnionFind uf(2 * n + 1);
+    vector<int> vec;
+    rep(i, n){
+        int a, b;
+        cin >> a >> b;
+        uf.merge(a, b);
+        vec.push_back(a);
+        vec.push_back(b);
+    }
+    sort(vec.rbegin(), vec.rend());
+
+    for(auto itr = vec.begin(); itr != vec.end(); itr++){
+        int i = *itr;
+        if(uf.connected(1, i)){
+            cout << *itr << endl;
+            return 0;
+        }
+    }
+    cout << 1 << endl;
     return 0;
 }
