@@ -1,13 +1,3 @@
-#include <bits/stdc++.h>
-
-#define int long long
-#define rep(i, n) for (int i = 0; i < (int)(n); i++)
-
-using namespace std;
-
-/* /// @see
-///
-https://zenn.dev/reputeless/books/standard-cpp-for-competitive-programming/viewer/union-find
 class UnionFind {
    public:
     UnionFind() = default;
@@ -16,7 +6,7 @@ class UnionFind {
     /// @param n 要素数
     explicit UnionFind(size_t n) : m_parentsOrSize(n, -1) {}
 
-    /// @brief 頂点 i の root のインデックスを返します。
+    /// @brief 頂点 i の root のインデックスを返します
     /// @param i 調べる頂点のインデックス
     /// @return 頂点 i の root のインデックス
     int find(int i) {
@@ -62,13 +52,3 @@ class UnionFind {
     // ただし root の場合は (-1 * そのグループに属する要素数)
     std::vector<int> m_parentsOrSize;
 }; */
-
-signed main() {
-    int n;
-    string s;
-    cin >> s >> n;
-    
-
-
-    return 0;
-}

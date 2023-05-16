@@ -16,7 +16,7 @@ class UnionFind {
     /// @param n 要素数
     explicit UnionFind(size_t n) : m_parentsOrSize(n, -1) {}
 
-    /// @brief 頂点 i の root のインデックスを返します。
+    /// @brief 頂点 i の root のインデックスを返します
     /// @param i 調べる頂点のインデックス
     /// @return 頂点 i の root のインデックス
     int find(int i) {
@@ -65,10 +65,23 @@ class UnionFind {
 
 signed main() {
     int n;
-    string s;
-    cin >> s >> n;
+    cin >> n;
+    vector<vector<int>> a(n, vector<int>(2));
+    rep(i, n){
+        cin >> a[i][0];
+        cin >> a[i][1];
+    }
+    sort(a.begin(), a.end());
+    int ans = 0;
+    int day = 0;
     
-
+    rep(i, n){
+        if(day < a[i][0]){
+            day = a[i][1];
+            ans++;
+        }
+    }
+    cout << ans << endl;
 
     return 0;
 }

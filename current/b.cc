@@ -6,29 +6,32 @@
 using namespace std;
 
 signed main() {
-    int n, k;
-    int ans = 0;
-
-    cin >> n >> k;
-    set<int> st;
-    map<int, int> cnt;
-    vector<int> c(k, -1);
-    rep(i, n) {
-        int last = c[i % k];
-        cin >> c[i % k];
-
-        cnt[c[i % k]]++;
-        if (i >= k) {
-            cnt[last]--;
-            if (cnt[last] == 0) {
-                st.erase(last);
+    int n;
+    cin >> n;
+    vector<int> vec(n);
+    rep(i, n) cin >> vec[i];
+    
+    vector<int> ans;
+    rep(i, n-1){
+        if(abs(vec[i] - vec[i+1]) == 1){
+            ans.push_back(vec[i]);
+        }else{
+            if(vec[i] < vec[i+1]){
+                for(int k = vec[i];k < vec[i+1];k++){
+                    ans.push_back(k);
+                }
+            } else{
+                for(int k = vec[i]; k > vec[i+1]; k--){
+                    ans.push_back(k);
+                }
             }
         }
-        st.insert(c[i % k]);
-        if (ans < st.size()) ans = st.size();
     }
 
-    cout << ans << endl;
+    ans.push_back(vec[n-1]);
+
+    for(int i: ans) cout << i << " ";
+    cout << endl;
 
     return 0;
 }

@@ -5,9 +5,6 @@
 
 using namespace std;
 
-/* /// @see
-///
-https://zenn.dev/reputeless/books/standard-cpp-for-competitive-programming/viewer/union-find
 class UnionFind {
    public:
     UnionFind() = default;
@@ -16,7 +13,7 @@ class UnionFind {
     /// @param n 要素数
     explicit UnionFind(size_t n) : m_parentsOrSize(n, -1) {}
 
-    /// @brief 頂点 i の root のインデックスを返します。
+    /// @brief 頂点 i の root のインデックスを返します
     /// @param i 調べる頂点のインデックス
     /// @return 頂点 i の root のインデックス
     int find(int i) {
@@ -61,14 +58,37 @@ class UnionFind {
     // m_parentsOrSize[i] は i の 親,
     // ただし root の場合は (-1 * そのグループに属する要素数)
     std::vector<int> m_parentsOrSize;
-}; */
+};
 
 signed main() {
-    int n;
-    string s;
-    cin >> s >> n;
-    
+    int n, m;
+    cin >> n >> m;
+    UnionFind uf(n + 1);
+    rep(i, m){
+        int v, w;
+        cin >> v >> w;
+        uf.merge(v, w);
+    }
 
+    set<int> st;
+    st.insert(1);
 
+    int ans;
+
+    rep(i, n){
+        if(i + 1 == 1) continue;
+        else{
+            bool ck = true;
+            for(auto itr = st.begin(); itr != st.end(); itr++){
+                if(uf.connected(*itr, i + 1)){
+                    ck = false;
+                    break;
+                }
+            }
+            if(ck) st.insert(i + 1);
+        }
+    }
+
+    cout << st.size() << endl;
     return 0;
 }

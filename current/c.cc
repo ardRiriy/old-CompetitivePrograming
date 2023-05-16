@@ -5,95 +5,40 @@
 
 using namespace std;
 
+bool ch(char c){
+    if(c == 'a' || c == 't' || c == 'c' || c == 'd' || c == 'o' || c == 'e' || c == 'r') return true;
+    return false;
+}
 signed main() {
-    int n;
-    cin >> n;
-    string s;
-    cin >> s;
-
-    map<char, int> mp;
-    rep(i, n) mp[s[i]]++;  // O(n)
-    cout << mp['R'] << " " << mp['G'] << " " << mp['B'] << endl;
-    int ans = 0;
-    for (int i = 0; i < n; i++) {
-        if (s[i] == 'R') {
-            for (int j = i; j < n; j++) {
-                if (s[j] == 'G') {
-                    int k = 2 * j - i;
-                    cout << i << j << k - 1 << endl;
-
-                    if (k < n) {
-                        if (s[k - 1] != 'B') {
-                            ans += mp['B'];
-                        } else {
-                            ans += mp['B'] - 1;
-                        }
-                    }
-                } else if (s[j] == 'B') {
-                    int k = 2 * j - i;
-                    cout << i << j << k - 1 << endl;
-
-                    if (k < n) {
-                        if (s[k - 1] != 'G') {
-                            ans += mp['G'];
-                        } else {
-                            ans += mp['G'] - 1;
-                        }
-                    }
-                }
-            }
-        } else if (s[i] == 'G') {
-            for (int j = i; j < n; j++) {
-                if (s[j] == 'R') {
-                    int k = 2 * j - i;
-                    cout << i << j << k - 1 << endl;
-
-                    if (k < n) {
-                        if (s[k - 1] != 'B') {
-                            ans += mp['B'];
-                        } else {
-                            ans += mp['B'] - 1;
-                        }
-                    }
-                } else if (s[j] == 'B') {
-                    int k = 2 * j - i;
-                    cout << i << j << k - 1 << endl;
-
-                    if (k < n) {
-                        if (s[k - 1] != 'R') {
-                            ans += mp['R'];
-                        } else {
-                            ans += mp['R'] - 1;
-                        }
-                    }
-                }
-            }
-        } else {  // B
-            for (int j = i; j < n; j++) {
-                if (s[j] == 'G') {
-                    int k = 2 * j - i;
-                    cout << i << j << k - 1 << endl;
-
-                    if (k < n) {
-                        if (s[k - 1] != 'R') {
-                            ans += mp['R'];
-                        } else {
-                            ans += mp['R'] - 1;
-                        }
-                    }
-                } else if (s[j] == 'R') {
-                    int k = 2 * j - i;
-                    if (k < n) {
-                        if (s[k - 1] != 'G') {
-                            ans += mp['G'];
-                        } else {
-                            ans += mp['G'] - 1;
-                        }
-                    }
-                }
-            }
-        }
+    string s, t;
+    cin >> s >> t;
+    
+    map<char, int> ms, mt;
+    rep(i, 26){
+        ms['a' + i] = 0;
+        mt['a' + i] = 0;
     }
-    cout << ans << endl;
+    rep(i, s.size()){
+        ms[s[i]]++;
+        mt[t[i]]++;
+    }
+    
+    for(auto itr = ms.begin(); itr != ms.end(); itr++){
+        if(itr->first == '@') continue;
+        int diff = itr->second - mt[itr->first];
+        if(diff != 0){
+            if(ch(itr->first)){
+                if(diff > 0) mt['@'] -= diff;
+                else ms['@'] += diff;
+            } else{
+                cout << "No" << endl;
+                return 0;
+            }
+        }        
+    }
+    
+    if(ms['@'] >= 0 && mt['@'] >= 0 && ms['@'] == mt['@']) cout << "Yes" << endl;
+    else cout << "No" << endl;
     return 0;
+
 }

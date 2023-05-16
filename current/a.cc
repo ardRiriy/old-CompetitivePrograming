@@ -6,9 +6,23 @@
 using namespace std;
 
 signed main() {
-    int a, b;
-    cin >> a >> b;
-    cout << fixed << std::setprecision(0);
-    cout << pow(32, a - b) << endl;
+    int n;
+    cin >> n;
+    string s;
+    cin >> s;
+    int ct = 0, at =0;
+    rep(i, n){
+        if(s[i] == 'T') ct++;
+        else at++;
+    } 
+
+    if(ct == at){
+        if(s[n-1] == 'A') cout << "T" << endl;
+        else cout << "A" << endl;
+    } else if(ct > at){
+        cout << "T" << endl;
+    }else{
+        cout <<"A" << endl;
+    }
     return 0;
 }

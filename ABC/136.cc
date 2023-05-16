@@ -16,7 +16,7 @@ class UnionFind {
     /// @param n 要素数
     explicit UnionFind(size_t n) : m_parentsOrSize(n, -1) {}
 
-    /// @brief 頂点 i の root のインデックスを返します。
+    /// @brief 頂点 i の root のインデックスを返します
     /// @param i 調べる頂点のインデックス
     /// @return 頂点 i の root のインデックス
     int find(int i) {
@@ -63,12 +63,19 @@ class UnionFind {
     std::vector<int> m_parentsOrSize;
 }; */
 
+# define M 200000
+
 signed main() {
-    int n;
     string s;
-    cin >> s >> n;
-    
+    cin >> s;
+    map<int, int> mp;
 
+    int N = s.size();
 
-    return 0;
+    rep(i, N) mp[i] = 1;
+
+    rep(i, M){
+    } 
+
 }
+
