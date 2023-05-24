@@ -6,6 +6,8 @@
 using namespace std;
 
 signed main() {
-    int n;
+    std::cout << std::fixed;
+    std::cout << std::setprecision(20);
+
     return 0;
 }

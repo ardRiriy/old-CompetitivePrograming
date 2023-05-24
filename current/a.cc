@@ -6,23 +6,16 @@
 using namespace std;
 
 signed main() {
-    int n;
-    cin >> n;
-    string s;
-    cin >> s;
-    int ct = 0, at =0;
-    rep(i, n){
-        if(s[i] == 'T') ct++;
-        else at++;
-    } 
+    std::cout << std::fixed;
+    std::cout << std::setprecision(20);
+    
+    int a, b;
+    
+    cin >> a >> b;
+    int ans = a/b;
+    if(a%b == 0) cout << ans << endl;
+    else cout << ans + 1 << endl;
 
-    if(ct == at){
-        if(s[n-1] == 'A') cout << "T" << endl;
-        else cout << "A" << endl;
-    } else if(ct > at){
-        cout << "T" << endl;
-    }else{
-        cout <<"A" << endl;
-    }
     return 0;
 }
+
