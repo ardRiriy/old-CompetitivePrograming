@@ -5,97 +5,34 @@
 
 using namespace std;
 
-
-
 signed main() {
     std::cout << std::fixed;
     std::cout << std::setprecision(20);
+    int n, m;
+    cin >> n >> m;
+    vector<vector<int>> vec(m, vector<int>(n));
 
-    int h, w;
-    cin >> h >> w;
-    vector<string> vec(h);
+    vector<vector<bool>> ans(n + 1, vector<bool>(n + 1));
 
-    rep(i, h) cin >> vec[i];
-    
-    rep(i, h){
-        rep(k, w){
-            if(vec[i][k] == 's'){
-                //上
-                if(i >= 4){
-                    if(vec[i-1][k] == 'n' && vec[i-2][k] == 'u' && vec[i-3][k] == 'k' && vec[i-4][k] == 'e'){
-                        rep(z, 5){
-                            cout << i - z + 1<< " " << k+1 << endl;
-                        }
-                    return 0;
-                    }
-                }
-                // migiue 
-                if(i >= 4 && k + 4 < w){
-                    if(vec[i-1][k+1] == 'n' && vec[i-2][k+2] == 'u' && vec[i-3][k+3] == 'k' && vec[i-4][k+4] == 'e'){
-                        rep(z, 5){
-                            cout << i - z +1<< " " <<  k+z +1 << endl;
-                        }
-                    return 0;
-                    }
-                }
-                // 右k 
-                if(k + 4 < w){
-                    if(vec[i][k+1] == 'n' && vec[i][k+2] == 'u' && vec[i][k+3] == 'k' && vec[i][k+4] == 'e'){
-                        rep(z, 5){
-                            cout << i +1<< " " << k + z +1<< endl;
-                        }
-                    return 0;
-                    }
-                }
-                // migi下
-                if(k + 4 < w && i + 4 < h){
-                    if(vec[i+1][k+1] == 'n' && vec[i+2][k+2] == 'u' && vec[i+3][k+3] == 'k' && vec[i+4][k+4] == 'e'){
-                        rep(z, 5){
-                            cout << i+z+1 << " " << k + z +1<< endl;
-                        }
-                    return 0;
-                    }
-                }
-                // sita
-                if(i + 4 < h){
-                    if(vec[i+1][k] == 'n' && vec[i+2][k] == 'u' && vec[i+3][k] == 'k' && vec[i+4][k] == 'e'){
-                        rep(z, 5){
-                            cout << i + z + 1 << " " << k +1<< endl;
-                        }
-                    return 0;
-                    }
-                }
-                // hidari sita
-                if(k >= 4 && i + 4 < h){
-                    if(vec[i+1][k-1] == 'n' && vec[i+2][k-2] == 'u' && vec[i+3][k-3] == 'k' && vec[i+4][k-4] == 'e'){
-                        rep(z, 5){
-                            cout << i + z+1 << " " << k - z +1<< endl;
-                        }
-                        
-                    return 0;
-                    }
-                }
+    rep(i, m) rep(j, n) cin >> vec[i][j];
 
-                if(k >= 4){
-                    if(vec[i][k-1] == 'n' && vec[i][k-2] == 'u' && vec[i][k-3] == 'k' && vec[i][k-4] == 'e'){
-                        rep(z, 5){
-                            cout << i+1 << " " << k - z+1<< endl;
-                        }
-                    return 0;
-                    }
-                }
-                if(k >= 4 && i >= 4){
-                    if(vec[i-1][k-1] == 'n' && vec[i-2][k-2] == 'u' && vec[i-3][k-3] == 'k' && vec[i-4][k-4] == 'e'){
-                        rep(z, 5){
-                            cout << i-z+1 << " " << k - z +1<< endl;
-                        }
-                        return 0;
-                    }
-                }
-            }
-        }
+    rep(i, m) rep(j, n) {
+        if (j == 0) continue;
+        ans[vec[i][j]][vec[i][j - 1]] = true;
+        ans[vec[i][j - 1]][vec[i][j]] = true;
     }
 
+    int cnt = 0;
+    rep(i, n) rep(j, n) {
+        if (i == j) continue;
+        if (!ans[i + 1][j + 1]) cnt++;
+
+        /*         if (ans[i + 1][j + 1])
+                    cout << 1 << endl;
+                else
+                    cout << 0 << endl; */
+    }
+    cnt /= 2;
+    cout << cnt << endl;
     return 0;
 }
-

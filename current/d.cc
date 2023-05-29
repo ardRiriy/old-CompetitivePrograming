@@ -5,43 +5,47 @@
 
 using namespace std;
 
-int b_search(vector<int> &v, int k){
-    int left = -1, right = v.size();
-    if(v.back() < k) return v.size() - 1;
-    while(abs(right-left) > 1){
-        int mid = (left + right) / 2;
-        if(v[mid] >= k){
-            right = mid;
-        }else{
-            left = mid;
-        }
-    }
-    return right;
-}
-
-
 signed main() {
     std::cout << std::fixed;
     std::cout << std::setprecision(20);
-    
-    int n, m, d;
-    cin >> n >> m >> d;
+    int x, y, z;
+    cin >> x >> y >> z;
 
-    vector<int> a(n);
-    vector<int> b(m);
+    string s;
+    cin >> s;
+    int n = s.size();
 
-    rep(i, n) cin >> a[i];
-    rep(i, m) cin >> b[i];
-    sort(a.begin(), a.end());
-    int ans = 0;
+    vector<vector<int>> dp(n + 1, vector<int>(2, LLONG_MAX));
 
-    rep(i, m){
-        int index = b_search(a, b[i]+d);
-        if(b[i] + d  < a[index])index--;
-        if(index >= 0 && a[index] >= b[i] - d) ans = max(ans, a[index] + b[i]);
+    dp[0][0] = 0;
+    rep(i, n) {
+        rep(j, 2) {
+            if (dp[i][j] == LLONG_MAX) continue;
+
+            if (s[i] == 'a') {
+                if (j == 0) {
+                    dp[i + 1][j] = min(dp[i + 1][j], dp[i][j] + x);
+                    dp[i + 1][1 - j] = min(dp[i + 1][1 - j], dp[i][j] + y + z);
+                } else {
+                    dp[i + 1][j] = min(dp[i + 1][j], dp[i][j] + y);
+                    dp[i + 1][1 - j] = min(dp[i + 1][1 - j], dp[i][j] + x + z);
+                }
+            }
+
+            if (s[i] == 'A') {
+                if (j == 1) {
+                    dp[i + 1][j] = min(dp[i + 1][j], dp[i][j] + x);
+                    dp[i + 1][1 - j] = min(dp[i + 1][1 - j], dp[i][j] + y + z);
+                } else {
+                    dp[i + 1][j] = min(dp[i + 1][j], dp[i][j] + y);
+                    dp[i + 1][1 - j] = min(dp[i + 1][1 - j], dp[i][j] + x + z);
+                }
+            }
+        }
     }
-    
-    if(ans == 0) cout << -1 << endl;
-    else cout << ans << endl;
+    int ans = min(dp[n][0], dp[n][1]);
+
+    cout << ans << endl;
+
     return 0;
 }
