@@ -2,6 +2,8 @@
 
 #define int long long
 #define rep(i, n) for (int i = 0; i < (int)(n); i++)
+#define YES cout << "Yes" << endl;
+#define NO cout << "No" << endl;
 const int INF = LLONG_MAX;
 const int N_INF = LLONG_MIN;
 

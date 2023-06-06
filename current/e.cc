@@ -2,8 +2,13 @@
 
 #define int long long
 #define rep(i, n) for (int i = 0; i < (int)(n); i++)
+#define YES cout << "Yes" << endl;
+#define NO cout << "No" << endl;
+const int INF = LLONG_MAX;
+const int N_INF = LLONG_MIN;
 
 using namespace std;
+
 class UnionFind {
    public:
     UnionFind() = default;
@@ -59,13 +64,47 @@ class UnionFind {
     std::vector<int> m_parentsOrSize;
 };
 
+bool chmin(int &a, int b) {
+    if (a > b) {
+        a = b;
+        return true;
+    }
+    return false;
+}
+
+bool chmax(int &a, int b) {
+    if (a < b) {
+        a = b;
+        return true;
+    }
+    return false;
+}
 signed main() {
     std::cout << std::fixed;
     std::cout << std::setprecision(20);
 
-    int n;
-    cin >> n;
-    UnionFind uf(n);
+    int N, M;
+    cin >> N >> M;
+    UnionFind uf(N);
+    rep(i, M) {
+        int u, v;
+        cin >> u >> v;
+        uf.merge(v, u);
+    }
+    int K;
+    int X[K];
+    int Y[K];
+    rep(i, K) {
+        int tmp;
+        cin >> X[i];
+        cin >> Y[i];
+    }
 
+    int Q;
+    cin >> Q;
+    rep(i, Q) {
+        int p, q;
+        cin >> p >> q;
+    }
     return 0;
 }

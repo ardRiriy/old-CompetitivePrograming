@@ -2,37 +2,52 @@
 
 #define int long long
 #define rep(i, n) for (int i = 0; i < (int)(n); i++)
+#define YES cout << "Yes" << endl;
+#define NO cout << "No" << endl;
+const int INF = LLONG_MAX;
+const int N_INF = LLONG_MIN;
 
 using namespace std;
+bool chmin(int &a, int b) {
+    if (a > b) {
+        a = b;
+        return true;
+    }
+    return false;
+}
 
+bool chmax(int &a, int b) {
+    if (a < b) {
+        a = b;
+        return true;
+    }
+    return false;
+}
 signed main() {
     std::cout << std::fixed;
     std::cout << std::setprecision(20);
-    int n, m;
-    cin >> n >> m;
-    vector<vector<int>> vec(m, vector<int>(n));
-
-    vector<vector<bool>> ans(n + 1, vector<bool>(n + 1));
-
-    rep(i, m) rep(j, n) cin >> vec[i][j];
-
-    rep(i, m) rep(j, n) {
-        if (j == 0) continue;
-        ans[vec[i][j]][vec[i][j - 1]] = true;
-        ans[vec[i][j - 1]][vec[i][j]] = true;
+    int N;
+    cin >> N;
+    if (N < 10 * 10 * 10) {
+    } else if (N < 10 * 10 * 10 * 10) {
+        N /= 10;
+        N *= 10;
+    } else if (N < 10 * 10 * 10 * 10 * 10) {
+        N /= 100;
+        N *= 100;
+    } else if (N < 10 * 10 * 10 * 10 * 10 * 10) {
+        N /= 1000;
+        N *= 1000;
+    } else if (N < 10 * 10 * 10 * 10 * 10 * 10 * 10) {
+        N /= 10000;
+        N *= 10000;
+    } else if (N < 10 * 10 * 10 * 10 * 10 * 10 * 10 * 10) {
+        N /= 100000;
+        N *= 100000;
+    } else {
+        N /= 1000000;
+        N *= 1000000;
     }
-
-    int cnt = 0;
-    rep(i, n) rep(j, n) {
-        if (i == j) continue;
-        if (!ans[i + 1][j + 1]) cnt++;
-
-        /*         if (ans[i + 1][j + 1])
-                    cout << 1 << endl;
-                else
-                    cout << 0 << endl; */
-    }
-    cnt /= 2;
-    cout << cnt << endl;
+    cout << N << endl;
     return 0;
 }

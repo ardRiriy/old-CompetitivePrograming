@@ -2,49 +2,60 @@
 
 #define int long long
 #define rep(i, n) for (int i = 0; i < (int)(n); i++)
+#define YES cout << "Yes" << endl;
+#define NO cout << "No" << endl;
+const int INF = LLONG_MAX;
+const int N_INF = LLONG_MIN;
 
 using namespace std;
+bool chmin(int &a, int b) {
+    if (a > b) {
+        a = b;
+        return true;
+    }
+    return false;
+}
 
+bool chmax(int &a, int b) {
+    if (a < b) {
+        a = b;
+        return true;
+    }
+    return false;
+}
 signed main() {
     std::cout << std::fixed;
     std::cout << std::setprecision(20);
+    int N, D;
+    cin >> N >> D;
+    int v[N][2];
 
-    int n, m, h, k;
-    cin >> n >> m >> h >> k;
-
-    string s;
-    cin >> s;
-
-    set<pair<int, int>> item;
-
-    rep(i, m) {
-        int x, y;
-        cin >> x >> y;
-        auto p = make_pair(x, y);
-        item.insert(p);
+    rep(i, N) {
+        cin >> v[i][0];
+        cin >> v[i][1];
     }
-    int cx = 0, cy = 0;
-    rep(i, s.size()) {
-        h--;
-        if (h < 0) {
-            cout << "No" << endl;
-            return 0;
-        }
-        if (s[i] == 'R')
-            cx++;
-        else if (s[i] == 'L')
-            cx--;
-        else if (s[i] == 'U')
-            cy++;
-        else
-            cy--;
 
-        auto now = make_pair(cx, cy);
-        if (item.count(now) == 1 && h < k) {
-            item.erase(now);
-            h = k;
+    vector<bool> is(N, false);
+    is[0] = true;
+
+    queue<int> que;
+    que.push(0);
+    while (!que.empty()) {
+        int i = que.front();
+        rep(k, N) {
+            if (i == k || is[k]) continue;
+            int kyori =
+                pow((v[i][0] - v[k][0]), 2) + pow((v[i][1] - v[k][1]), 2);
+            if (kyori <= D * D) {
+                is[k] = true;
+                que.push(k);
+            }
         }
+        que.pop();
     }
-    cout << "Yes" << endl;
+
+    rep(i, N) {
+        if (is[i]) YES else NO
+    }
     return 0;
 }

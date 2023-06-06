@@ -2,28 +2,45 @@
 
 #define int long long
 #define rep(i, n) for (int i = 0; i < (int)(n); i++)
+#define YES cout << "Yes" << endl;
+#define NO cout << "No" << endl;
+const int INF = LLONG_MAX;
+const int N_INF = LLONG_MIN;
 
 using namespace std;
+bool chmin(int &a, int b) {
+    if (a > b) {
+        a = b;
+        return true;
+    }
+    return false;
+}
 
+bool chmax(int &a, int b) {
+    if (a < b) {
+        a = b;
+        return true;
+    }
+    return false;
+}
 signed main() {
     std::cout << std::fixed;
     std::cout << std::setprecision(20);
     int n;
-    string s, t;
-    cin >> n >> s >> t;
+    cin >> n;
+    string s[n];
+    int age[n];
 
     rep(i, n) {
-        if (s[i] != t[i]) {
-            if (!((s[i] == 'l' && t[i] == '1') ||
-                  (s[i] == '1' && t[i] == 'l'))) {
-                if (!((s[i] == '0' && t[i] == 'o') ||
-                      (s[i] == 'o' && t[i] == '0'))) {
-                    cout << "No" << endl;
-                    return 0;
-                }
-            }
-        }
+        cin >> s[i];
+        cin >> age[i];
     }
-    cout << "Yes" << endl;
+    int min = INF;
+    int l;
+    rep(i, n) {
+        if (chmin(min, age[i])) l = i;
+    }
+
+    rep(i, n) { cout << s[(l + i) % n] << endl; }
     return 0;
 }
