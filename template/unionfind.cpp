@@ -3,13 +3,13 @@ class UnionFind {
     vector<int> uf;
 
    public:
-    UnionFind(int size) : uf(size) {
-        for (int i = 0; i < size; i++) uf[i] = i;
+    UnionFind(int n) : uf(n) {
+        for (int i = 0; i < n; i++) uf[i] = -1;
     }
 
     int root(int n) {
-        if (uf[n] != n) uf[n] = root(uf[n]);
-        return uf[n];
+        if (uf[n] >= 0) uf[n] = root(uf[n]);
+        return n;
     }
 
     bool connected(int a, int b) { return root(a) == root(b); }
@@ -17,14 +17,12 @@ class UnionFind {
     void marge(int a, int b) {
         int root_a = root(a);
         int root_b = root(b);
-        if (root_a != root_b) uf[root_a] = root_b;
+        if (root_a != root_b) {
+            if (root_a > root_b) swap(root_a, root_b);
+            uf[root_a] += root_b;
+            uf[root_b] = root_a;
+        }
     }
 
-    int size(int n) {
-        int cnt = 0;
-        int r = root(n);
-        for (int k : uf)
-            if (k == r) cnt++;
-        return cnt;
-    }
+    int size(int n) { return -uf[root(n)]; }
 };
