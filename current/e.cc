@@ -82,29 +82,46 @@ bool chmax(int &a, int b) {
 signed main() {
     std::cout << std::fixed;
     std::cout << std::setprecision(20);
+    int N, M, K;
+    cin >> N >> M >> K;
 
-    int N, M;
-    cin >> N >> M;
-    UnionFind uf(N);
+    unordered_map<int, unordered_set<int>> degree;
     rep(i, M) {
         int u, v;
         cin >> u >> v;
-        uf.merge(v, u);
-    }
-    int K;
-    int X[K];
-    int Y[K];
-    rep(i, K) {
-        int tmp;
-        cin >> X[i];
-        cin >> Y[i];
+        degree[u].insert(v);
+        degree[v].insert(u);
     }
 
-    int Q;
-    cin >> Q;
-    rep(i, Q) {
-        int p, q;
-        cin >> p >> q;
+    set<int> ans;
+    vector<int> aho(K);
+    vector<int> hp(K);
+    rep(i, K) {
+        cin >> aho[i];
+        cin >> hp[i];
     }
+
+    rep(i, K) {
+        ans.insert(aho[i]);
+        queue<int> q;
+        q.push(aho[i]);
+        while (hp[i] > 0) {
+            hp[i]--;
+            while (!q.empty()) {
+                int tmp = q.front();
+                q.pop();
+                for (auto itr = degree[tmp].begin(); itr != degree[tmp].end();
+                     itr++) {
+                    ans.insert(*itr);
+                    q.push(*itr);
+                }
+            }
+        }
+    }
+    cout << ans.size() << endl;
+    for (auto itr = ans.begin(); itr != ans.end(); itr++) {
+        cout << *itr << " ";
+    }
+    cout << endl;
     return 0;
 }

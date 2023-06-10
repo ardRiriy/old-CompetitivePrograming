@@ -26,36 +26,30 @@ bool chmax(int &a, int b) {
 signed main() {
     std::cout << std::fixed;
     std::cout << std::setprecision(20);
-    int N, D;
-    cin >> N >> D;
-    int v[N][2];
+    int H, W;
+    cin >> H >> W;
+    char a[H][W];
+    rep(i, H) rep(k, W) cin >> a[i][k];
 
-    rep(i, N) {
-        cin >> v[i][0];
-        cin >> v[i][1];
-    }
-
-    vector<bool> is(N, false);
-    is[0] = true;
-
-    queue<int> que;
-    que.push(0);
-    while (!que.empty()) {
-        int i = que.front();
-        rep(k, N) {
-            if (i == k || is[k]) continue;
-            int kyori =
-                pow((v[i][0] - v[k][0]), 2) + pow((v[i][1] - v[k][1]), 2);
-            if (kyori <= D * D) {
-                is[k] = true;
-                que.push(k);
+    int x1 = INF, x2 = N_INF, y1 = INF, y2 = N_INF;
+    rep(i, H) {
+        rep(k, W) {
+            if (a[i][k] == '#') {
+                chmin(x1, i);
+                chmax(x2, i);
+                chmin(y1, k);
+                chmax(y2, k);
             }
         }
-        que.pop();
     }
 
-    rep(i, N) {
-        if (is[i]) YES else NO
+    for (int i = x1; i <= x2; i++) {
+        for (int j = y1; j <= y2; j++) {
+            if (a[i][j] == '.') {
+                cout << i + 1 << " " << j + 1 << endl;
+                return 0;
+            }
+        }
     }
     return 0;
 }

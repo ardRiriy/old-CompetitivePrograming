@@ -41,49 +41,37 @@ signed main() {
     std::cout << std::fixed;
     std::cout << std::setprecision(20);
 
-    int W, H, N;
-    cin >> W >> H >> N;
-    vector<pair<int, int>> vec(N);
-    rep(i, N) {
-        int x, y;
-        cin >> x >> y;
-        vec[i] = make_pair(x, y);
+    int N;
+    cin >> N;
+    vector<int> A(N);
+    rep(i, N) cin >> A[i];
+    vector<int> a_slp(N);
+    a_slp[0] = 0;
+    for (int i = 1; i < N; i++) {
+        if (i % 2 == 0)
+            a_slp[i] = a_slp[i - 1] + (A[i] - A[i - 1]);
+        else
+            a_slp[i] = a_slp[i - 1];
     }
-    int A;
-    cin >> A;
-    vector<int> aLine(A + 1);
-    rep(i, A) cin >> aLine[i];
-    aLine[A] = W;
+    // for (int i : a_slp) cout << i << endl;
+    int Q;
+    cin >> Q;
+    rep(i, Q) {
+        int l, r;
+        cin >> l >> r;
+        int idx_l = b_search(A, l);
+        int idx_r = b_search(A, r);
+        // cout << idx_l << " " << idx_r << endl;
+        int ans = a_slp[idx_r] - a_slp[idx_l];
 
-    int B;
-    cin >> B;
-    vector<int> bLine(B + 1);
-    rep(i, B) cin >> bLine[i];
-    bLine[B] = H;
+        if (idx_l % 2 == 0) {
+            ans += A[idx_l] - l;
+        }
 
-    map<int, int> piece;
-
-    rep(i, N) {
-        int x = b_search(aLine, vec[i].first);
-        int y = b_search(bLine, vec[i].second);
-        /*         cout << x << " " << y << endl; */
-        piece[x + y * (A + 1)]++;
+        if (idx_r % 2 == 0) {
+            ans -= A[idx_r] - r;
+        }
+        cout << ans << endl;
     }
-    auto min_element_it = std::min_element(
-        piece.begin(), piece.end(),
-        [](const std::pair<int, int>& p1, const std::pair<int, int>& p2) {
-            return p1.second < p2.second;
-        });
-
-    auto max_element_it = std::max_element(
-        piece.begin(), piece.end(),
-        [](const std::pair<int, int>& p1, const std::pair<int, int>& p2) {
-            return p1.second < p2.second;
-        });
-    int m, M;
-    M = max_element_it->second;
-    m = min_element_it->second;
-    if (piece.size() != (A + 1) * (B + 1)) m = 0;
-    cout << m << " " << M << endl;
     return 0;
 }

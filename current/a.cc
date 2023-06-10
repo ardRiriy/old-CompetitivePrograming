@@ -28,19 +28,11 @@ signed main() {
     std::cout << std::setprecision(20);
     int n;
     cin >> n;
-    string s[n];
-    int age[n];
 
-    rep(i, n) {
-        cin >> s[i];
-        cin >> age[i];
-    }
-    int min = INF;
-    int l;
-    rep(i, n) {
-        if (chmin(min, age[i])) l = i;
-    }
-
-    rep(i, n) { cout << s[(l + i) % n] << endl; }
+    if (n % 5 < 3)
+        n -= n % 5;
+    else
+        n += (5 - n % 5);
+    cout << n << endl;
     return 0;
 }

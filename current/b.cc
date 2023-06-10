@@ -26,28 +26,17 @@ bool chmax(int &a, int b) {
 signed main() {
     std::cout << std::fixed;
     std::cout << std::setprecision(20);
-    int N;
-    cin >> N;
-    if (N < 10 * 10 * 10) {
-    } else if (N < 10 * 10 * 10 * 10) {
-        N /= 10;
-        N *= 10;
-    } else if (N < 10 * 10 * 10 * 10 * 10) {
-        N /= 100;
-        N *= 100;
-    } else if (N < 10 * 10 * 10 * 10 * 10 * 10) {
-        N /= 1000;
-        N *= 1000;
-    } else if (N < 10 * 10 * 10 * 10 * 10 * 10 * 10) {
-        N /= 10000;
-        N *= 10000;
-    } else if (N < 10 * 10 * 10 * 10 * 10 * 10 * 10 * 10) {
-        N /= 100000;
-        N *= 100000;
-    } else {
-        N /= 1000000;
-        N *= 1000000;
-    }
-    cout << N << endl;
+    char q, p;
+    cin >> p >> q;
+    map<char, int> m;
+    m['A'] = 0;
+    m['B'] = 3;
+    m['C'] = 4;
+    m['D'] = 8;
+    m['E'] = 9;
+    m['F'] = 14;
+    m['G'] = 23;
+
+    cout << abs(m[p] - m[q]) << endl;
     return 0;
 }
