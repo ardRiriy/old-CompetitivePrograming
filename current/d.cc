@@ -24,54 +24,40 @@ bool chmax(int& a, int b) {
     return false;
 }
 
-int b_search(vector<int>& v, int k) {
-    int left = -1, right = v.size();
-    while (abs(right - left) > 1) {
-        int mid = (left + right) / 2;
-        if (v[mid] >= k) {
-            right = mid;
-        } else {
-            left = mid;
-        }
-    }
-    return right;
-}
-
 signed main() {
     std::cout << std::fixed;
     std::cout << std::setprecision(20);
 
     int N;
     cin >> N;
-    vector<int> A(N);
-    rep(i, N) cin >> A[i];
-    vector<int> a_slp(N);
-    a_slp[0] = 0;
-    for (int i = 1; i < N; i++) {
-        if (i % 2 == 0)
-            a_slp[i] = a_slp[i - 1] + (A[i] - A[i - 1]);
-        else
-            a_slp[i] = a_slp[i - 1];
-    }
-    // for (int i : a_slp) cout << i << endl;
-    int Q;
-    cin >> Q;
-    rep(i, Q) {
-        int l, r;
-        cin >> l >> r;
-        int idx_l = b_search(A, l);
-        int idx_r = b_search(A, r);
-        // cout << idx_l << " " << idx_r << endl;
-        int ans = a_slp[idx_r] - a_slp[idx_l];
+    vector<pair<int, int>> vec(N);
 
-        if (idx_l % 2 == 0) {
-            ans += A[idx_l] - l;
-        }
-
-        if (idx_r % 2 == 0) {
-            ans -= A[idx_r] - r;
-        }
-        cout << ans << endl;
+    rep(i, N) {
+        int a, b;
+        cin >> a >> b;
+        vec[i] = make_pair(a, b);
     }
+
+    vector<vector<int>> dp(N + 1, vector<int>(2, N_INF));
+    dp[0][0] = 0;
+
+    rep(i, N) {
+        rep(k, 2) {
+            if (dp[i][k] == N_INF) continue;
+            if (vec[i].first == 0) {
+                // tabenai
+                chmax(dp[i + 1][k], dp[i][k]);
+                // taberu
+                chmax(dp[i + 1][0], dp[i][k] + vec[i].second);
+            } else {
+                chmax(dp[i + 1][k], dp[i][k]);
+                if (k == 0) {
+                    chmax(dp[i + 1][1], dp[i][k] + vec[i].second);
+                }
+            }
+        }
+        // cout << dp[i + 1][0] << " " << dp[i + 1][1] << endl;
+    }
+    cout << max(dp[N][0], dp[N][1]) << endl;
     return 0;
 }

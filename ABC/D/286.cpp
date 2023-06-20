@@ -23,18 +23,29 @@ bool chmax(int &a, int b) {
     }
     return false;
 }
+
+vector<int> coin(101, 0);
+
 signed main() {
     std::cout << std::fixed;
     std::cout << std::setprecision(20);
-    int a[64];
-    rep(i, 64) {
-        cin >> a[i];
-        a[i] = a[i] << i;
+
+    int N, X;
+    cin >> N >> X;
+    vector<vector<bool>> dp(N + 1, vector<bool>(X + 1, false));
+    dp[0][0] = true;
+    rep(i, N) {
+        int a, b;
+        cin >> a >> b;
+        rep(k, X + 1) {
+            if (dp[i][k]) {
+                rep(l, b + 1) {
+                    if (k + a * l <= X) {
+                        dp[i + 1][k + a * l] = true;
+                    }
+                }
+            }
+        }
     }
-
-    int ans = 0;
-
-    rep(i, 64) { ans += a[i]; }
-    cout << ans << endl;
-    return 0;
+    if (dp[N][X]) YES else NO return 0;
 }

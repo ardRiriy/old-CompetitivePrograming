@@ -26,13 +26,10 @@ bool chmax(int &a, int b) {
 signed main() {
     std::cout << std::fixed;
     std::cout << std::setprecision(20);
-    int n;
-    cin >> n;
-
-    if (n % 5 < 3)
-        n -= n % 5;
-    else
-        n += (5 - n % 5);
-    cout << n << endl;
+    int N;
+    string S;
+    cin >> N >> S;
+    rep(i, N) cout << S[i] << S[i];
+    cout << endl;
     return 0;
 }

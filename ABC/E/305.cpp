@@ -26,15 +26,8 @@ bool chmax(int &a, int b) {
 signed main() {
     std::cout << std::fixed;
     std::cout << std::setprecision(20);
-    int a[64];
-    rep(i, 64) {
-        cin >> a[i];
-        a[i] = a[i] << i;
-    }
 
-    int ans = 0;
+    int N, M, K cin >> N >> M >> K;
 
-    rep(i, 64) { ans += a[i]; }
-    cout << ans << endl;
     return 0;
 }
