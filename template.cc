@@ -1,7 +1,7 @@
 #include <bits/stdc++.h>
 #define int long long
 #define rep(i, n) for (int i = 0; i < (int)(n); i++)
-#define print(x) cout << x << endl;
+#define print(x) cout << x << endl
 const int INF = LLONG_MAX;
 const int N_INF = LLONG_MIN;
 using namespace std;
@@ -16,6 +16,7 @@ class UnionFind {
 };
 bool chmin(int &a, int b) { if (a > b) { a = b; return true; } return false; }
 bool chmax(int &a, int b) { if (a < b) { a = b; return true; } return false; }
+int power(int base, int exponent) {int result = 1;for (int i = 0; i < exponent; i++) result *= base; return result; }
 int b_search(vector<int>& v, int k) { int ng = -1, ok = v.size(); while (abs(ng - ok) > 1) { int mid = ok + (ng - ok) / 2; if (v[mid] >= k) ok = mid; else ng = mid; } return ok; }
 
 void solve() {
@@ -25,6 +26,7 @@ void solve() {
 signed main() {
     std::cout << std::fixed;
     std::cout << std::setprecision(20);
+    std::cin.tie(0)->sync_with_stdio(0);
     int times = 1;
     // cin >> times;
     while (times--) solve();
