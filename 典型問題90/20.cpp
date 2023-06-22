@@ -20,20 +20,13 @@ int b_search(vector<int>& v, int k) { int ng = -1, ok = v.size(); while (abs(ng 
 
 void solve() {
     // hogehoge
-    int N, A, B, C;
-    cin >> N >> A >> B >> C;
-    int ans = INF;
-    rep(i, 9999){
-        rep(k, 9999){
-            if(i + k >= 9999) break;
-            int tmp =N-A*i-B*k;
-            if(tmp < 0) break;
-            if(tmp%C==0){
-                chmin(ans, i+k+tmp/C);
-            }
-        }
+    int a, b, c;
+    cin >> a >> b >> c;
+    int tmp = c;
+    rep(i, b-1){
+        c *= tmp;
     }
-    print(ans);
+    if(a < c) print("Yes"); else print("No");
 }
 
 signed main() {

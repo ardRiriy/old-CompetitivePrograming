@@ -20,26 +20,40 @@ int b_search(vector<int>& v, int k) { int ng = -1, ok = v.size(); while (abs(ng 
 
 void solve() {
     // hogehoge
-    int N, A, B, C;
-    cin >> N >> A >> B >> C;
-    int ans = INF;
-    rep(i, 9999){
-        rep(k, 9999){
-            if(i + k >= 9999) break;
-            int tmp =N-A*i-B*k;
-            if(tmp < 0) break;
-            if(tmp%C==0){
-                chmin(ans, i+k+tmp/C);
-            }
+    int N, M;
+    cin >> N >> M;
+    vector<pair<int, int>> vec(M);
+    UnionFind uf(N);
+    rep(i, M){
+        int u, v;
+        cin >> u >> v;
+        u--;v--;
+        uf.marge(u, v);
+        vec[i] = make_pair(u, v);
+    }
+    
+    vector<int> ans(N, N_INF);
+    rep(i, N){
+        ans[uf.root(i)] = 0; 
+    }
+    rep(i, M){
+        ans[uf.root(vec[i].first)]++;
+    }
+    rep(i, N){
+        if(ans[i] == N_INF) continue;
+        if(ans[i] != uf.size(i)){
+            print("No");
+            return;
         }
     }
-    print(ans);
+    print("Yes");
 }
 
 signed main() {
     std::cout << std::fixed;
     std::cout << std::setprecision(20);
     std::cin.tie(0)->sync_with_stdio(0);
+
     int times = 1;
     // cin >> times;
     while (times--) solve();
