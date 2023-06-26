@@ -25,29 +25,9 @@ bool chmax(int &a, int b) {
 }
 void solve() {
     // hogehoge
-    int N, K, Q;
-    cin >> N >> K >> Q;
-    vector<int> A(N, 0);
-    multiset<int> ms;
-    int now_sum = 0;
-    while (Q--) {
-        int x, y;
-        cin >> x >> y;
-        x--;
+   int N, M;
+   cin >> N >> M;
 
-        int tmp = A[x];
-        A[x] = y;
-        if (ms.count(tmp) != 0) {
-            ms.erase(tmp);
-        }
-        ms.insert(y);
-        while (ms.size() > K) {
-            ms.erase(ms.begin());
-        }
-
-        now_sum += (y - tmp);
-        cout << now_sum << endl;
-    }
 }
 
 signed main() {

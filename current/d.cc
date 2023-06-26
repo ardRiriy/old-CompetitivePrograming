@@ -1,63 +1,50 @@
 #include <bits/stdc++.h>
-
 #define int long long
 #define rep(i, n) for (int i = 0; i < (int)(n); i++)
-#define YES cout << "Yes" << endl;
-#define NO cout << "No" << endl;
+#define print(x) cout << x << endl
 const int INF = LLONG_MAX;
 const int N_INF = LLONG_MIN;
-
 using namespace std;
-bool chmin(int& a, int b) {
-    if (a > b) {
-        a = b;
-        return true;
-    }
-    return false;
-}
+class UnionFind { 
+    private: vector<int> uf;
+    public:
+    UnionFind(int size) : uf(size) { for (int i = 0; i < size; i++) uf[i] = -1; }
+    int root(int n) { if (uf[n] < 0) return n; else return uf[n] = root(uf[n]); }
+    bool connected(int a, int b) { return root(a) == root(b); }
+    void marge(int a, int b) { int root_a = root(a); int root_b = root(b); if (root_a != root_b) { if (uf[root_a] > uf[root_b]) swap(root_a, root_b); uf[root_a] += uf[root_b]; uf[root_b] = root_a; }}
+    int size(int n) { return -uf[root(n)]; }
+};
+bool chmin(int &a, int b) { if (a > b) { a = b; return true; } return false; }
+bool chmax(int &a, int b) { if (a < b) { a = b; return true; } return false; }
+int power(int base, int exponent) {int result = 1;for (int i = 0; i < exponent; i++) result *= base; return result; }
+int b_search(vector<int>& v, int k) { int ng = -1, ok = v.size(); while (abs(ng - ok) > 1) { int mid = ok + (ng - ok) / 2; if (v[mid] >= k) ok = mid; else ng = mid; } return ok; }
 
-bool chmax(int& a, int b) {
-    if (a < b) {
-        a = b;
-        return true;
+void solve() {
+    // hogehoge
+    int N;
+    string S;
+    cin >> N >> S;
+    stack<int> st;
+    rep(i, N){
+        // print(S);
+        if(S[i] == '(') st.push(i);
+        else if (S[i] == ')' && !st.empty()) {
+            S.erase(S.begin()+st.top(), S.begin()+i+1);
+            st.pop();
+            int tmp = N;
+            N = S.length();
+            i -= (tmp - N);
+        }
     }
-    return false;
+    print(S);
 }
 
 signed main() {
     std::cout << std::fixed;
     std::cout << std::setprecision(20);
-
-    int N;
-    cin >> N;
-    vector<pair<int, int>> vec(N);
-
-    rep(i, N) {
-        int a, b;
-        cin >> a >> b;
-        vec[i] = make_pair(a, b);
-    }
-
-    vector<vector<int>> dp(N + 1, vector<int>(2, N_INF));
-    dp[0][0] = 0;
-
-    rep(i, N) {
-        rep(k, 2) {
-            if (dp[i][k] == N_INF) continue;
-            if (vec[i].first == 0) {
-                // tabenai
-                chmax(dp[i + 1][k], dp[i][k]);
-                // taberu
-                chmax(dp[i + 1][0], dp[i][k] + vec[i].second);
-            } else {
-                chmax(dp[i + 1][k], dp[i][k]);
-                if (k == 0) {
-                    chmax(dp[i + 1][1], dp[i][k] + vec[i].second);
-                }
-            }
-        }
-        // cout << dp[i + 1][0] << " " << dp[i + 1][1] << endl;
-    }
-    cout << max(dp[N][0], dp[N][1]) << endl;
+    std::cin.tie(0)->sync_with_stdio(0);
+    int times = 1;
+    // cin >> times;
+    while (times--) solve();
     return 0;
 }
