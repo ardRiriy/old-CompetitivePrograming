@@ -21,30 +21,26 @@ bool chmax(int &a, int b) { if (a < b) { a = b; return true; } return false; }
 int power(int base, int exponent) {int result = 1;for (int i = 0; i < exponent; i++) result *= base; return result; }
 int b_search(vector<int>& v, int k) { int ng = -1, ok = v.size(); while (abs(ng - ok) > 1) { int mid = ok + (ng - ok) / 2; if (v[mid] >= k) ok = mid; else ng = mid; } return ok; }
 
+
+
 void solve() {
     // hogehoge
-    int N;
-    cin >> N;
-    string S[N];
-    rep(i, N) cin >> S[i];
-
-    rep(i, N){
-        rep(k, N){
-            if(i == k) continue;
-            string s1 = S[i] + S[k];
-            bool flag  = true;
-            rep(l, s1.size()){
-                if(s1[l] != s1[s1.size() -l - 1]) {
-                    flag = false;
-                }
-            }
-            if(flag) {
-                print("Yes");
-                return;
+    while(true){
+        int m, n, p;
+        cin >> m >> n >>p;
+        if(m == 0) break;
+        set<int> st;
+        st.insert(p);
+        rep(i, n){
+            int a, b;
+            cin >> a>> b;
+            if(st.count(a) == 1 || st.count(b)==1){
+                st.insert(a);
+                st.insert(b);
             }
         }
+        print(st.size());
     }
-    print("No");
 }
 
 

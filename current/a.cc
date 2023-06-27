@@ -4,7 +4,9 @@
 #define print(x) cout << x << endl
 const int INF = LLONG_MAX;
 const int N_INF = LLONG_MIN;
+
 using namespace std;
+
 class UnionFind { 
     private: vector<int> uf;
     public:
@@ -20,18 +22,18 @@ int power(int base, int exponent) {int result = 1;for (int i = 0; i < exponent; 
 int b_search(vector<int>& v, int k) { int ng = -1, ok = v.size(); while (abs(ng - ok) > 1) { int mid = ok + (ng - ok) / 2; if (v[mid] >= k) ok = mid; else ng = mid; } return ok; }
 
 void solve() {
-    int N;
-    std::cin >> N;
-
-    int A[7*N];
-    rep(i, 7*N) std::cin >> A[i];
-    int sum = 0;
-    rep(i, 7*N){
-        if(i%7 == 0) sum = 0;
-        sum += A[i];
-        if(i%7 == 6 )std::cout << sum << " ";
+    while(true){
+    int n;
+    cin >> n;
+    if(n==0)return;
+    int d[n];
+    rep(i, n) cin >> d[i];
+    int ans = 0;
+    rep(i, n-3){
+        if(d[i] == 2 && d[i+1] == 0 && d[i+2] == 2 && d[i+3] == 0)ans++;
     }
-    std::cout << endl;
+    print(ans);
+    }
 }
 
 signed main() {

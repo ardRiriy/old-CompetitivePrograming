@@ -21,46 +21,101 @@ bool chmax(int &a, int b) { if (a < b) { a = b; return true; } return false; }
 int power(int base, int exponent) {int result = 1;for (int i = 0; i < exponent; i++) result *= base; return result; }
 int b_search(vector<int>& v, int k) { int ng = -1, ok = v.size(); while (abs(ng - ok) > 1) { int mid = ok + (ng - ok) / 2; if (v[mid] >= k) ok = mid; else ng = mid; } return ok; }
 
-void solve() {
-    int Ha, Wa;
-    cin >> Ha >> Wa;
-    vector<string> A(Ha);
-    rep(i, Ha)cin >> A[i];
+int n;
+int win_count;
 
-    int Hb, Wb;
-    cin >> Hb >> Wb;
-    vector<string> B(Hb);
-    rep(i, Hb)cin >> B[i];
+int win_num(vector<int> &vec){
+    int win = 0;
+    rep(i, vec.size()){
+        if(vec[i] == 1) win++;
+    }
+    return win;
+}
 
-    int Hx, Wx;
-    cin >> Hx >> Wx;
-    vector<string> X(Hx);
-    rep(i, Hx)cin >> X[i];
+int lose_num(vector<int> &vec){
+    int lose = 0;
+    rep(i, vec.size()){
+        if(vec[i] == 0) lose++;
+    }
+    return lose;
+}
 
-    vector<pair<int, int>> stA, stB, stX;
-    rep(i, Ha) rep(k, Wa) if (A[i][k] == '#') stA.push_back({i, k});
-    rep(i, Hb) rep(k, Wb) if (B[i][k] == '#') stB.push_back({i, k});
-    rep(i, Hx) rep(k, Wx) if (X[i][k] == '#') stX.push_back({i, k});
+int dfs(vector<vector<int>> vec, int x, int y){
+    int ans = 0;
+    int now_x_win = win_num(vec[x]);
+    int now_x_lose = lose_num(vec[x]);
+    if(x == n-1 && y == n-1){
+        if(now_x_win != win_count) return 0;
+        return 1;
+    }
 
-    for (auto [ax, ay]: stA) {
-        for (auto [bx, by]: stB) {
-            vector<pair<int, int>> tmp(stX);
-            for (auto [x, y]: stA) {
-                auto it = find(tmp.begin(), tmp.end(), make_pair(ax - x, ay - y));
-                if (it != tmp.end()) tmp.erase(it);
+    // 枝刈
+    if(now_x_win > win_count || now_x_lose > win_count) return 0;
+    else if (now_x_win == win_count){
+        rep(i, n){
+            if(vec[x][i] == INF) {
+                vec[x][i] = 0;
+                vec[i][x] = 1;
             }
-            for (auto [x, y]: stB) {
-                auto it = find(tmp.begin(), tmp.end(), make_pair(bx - x, by - y));
-                if (it != tmp.end()) tmp.erase(it);
-            }
-            if (tmp.empty()) {
-                print("Yes");
-                return;
+        }
+    }else if ( now_x_lose == win_count){
+        rep(i, n){
+            if(vec[x][i] == INF) {
+                vec[x][i] = 1;
+                vec[i][x] = 0;
             }
         }
     }
-    // If no valid overlay was found, print "No"
-    print("No");
+
+    // まだ結果が不定
+    if(vec[x][y] == INF){
+        // xがyに勝つ
+        vec[x][y] = 1;
+        vec[y][x] = 0;
+        if(y == n-1) ans += dfs(vec, x+1, 0);
+        else ans += dfs(vec, x, y+1);
+    
+        // xがyに負ける
+        vec[x][y] = 0;
+        vec[y][x] = 1;
+        if(y == n-1) ans += dfs(vec, x+1, 0);
+        else ans += dfs(vec, x, y+1);
+    }else{
+        if(y == n-1) ans += dfs(vec, x+1, 0);
+        else ans += dfs(vec, x, y+1);
+    }
+
+    return ans;
+}
+
+void solve() {
+    while(true){
+/*         std::chrono::system_clock::time_point  start, end;
+        start = std::chrono::system_clock::now(); */
+        cin >> n;
+        if(n == 0) return;
+        win_count = n/2;
+        int m;
+        cin >> m;
+
+        vector<vector<int> > vec(n, vector<int>(n, INF));
+
+        rep(i, n){
+            vec[i][i] = -1;
+        }
+
+        rep(i, m){
+            int x, y;
+            cin >> x >> y;
+            x--;y--;
+            vec[x][y] = 1;
+            vec[y][x] = 0;
+        }
+        print(dfs(vec, 0, 0));
+/*         end = std::chrono::system_clock::now();
+        double elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(end-start).count();
+        print(elapsed << "ms."); */
+    }
 }
 signed main() {
     std::cout << std::fixed;

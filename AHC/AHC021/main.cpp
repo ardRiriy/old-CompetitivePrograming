@@ -26,7 +26,7 @@ int b_search(vector<int>& v, int k) { int ng = -1, ok = v.size(); while (abs(ng 
 int N = 30;
 
 int K = 0;
-vector<vector<int>> ans(10001, vector<int>(4));
+vector<vector<int>> ans(100001, vector<int>(4));
 vector<vector<int>> ball(N, vector<int>(N, INF));
 
 void ans_writer(int x0, int y0, int x1, int y1){
@@ -48,6 +48,7 @@ void output(){
 }
 
 
+// 貪欲解で使っていたもの もったいないので残している
 bool ball_swap(int i, int k){
     int h[4] = {-1, -1, -1, -1};    
     if(i != 0 && k > 0){
@@ -56,15 +57,9 @@ bool ball_swap(int i, int k){
     if(i != 0 && ball[i-1][k] != INF){
         if(ball[i][k] < ball[i-1][k]) h[1] = abs(ball[i][k] - ball[i-1][k]);
     }
-/*     if(i + 1 != N){
-        if(ball[i][k] > ball[i+1][k+1]) h[2] = abs(ball[i][k] - ball[i+1][k+1]);
-    }
-    if(i + 1 != N){
-        if(ball[i][k] > ball[i+1][k]) h[3] = abs(ball[i][k] - ball[i+1][k]);
-    } */
     int acp = -1;
     int maxH = -1;
-    rep(fff, 4){
+    rep(fff, 2){
         if(h[fff] != -1){
             if(chmax(maxH, h[fff])){
                 acp = fff;
@@ -79,21 +74,80 @@ bool ball_swap(int i, int k){
         return false;
     }else if(acp == 1){ 
         swap(ball[i][k], ball[i-1][k]);
-        ans_writer(i, k, i-1, k);
+        ans_writer(i, k, i-1,k);
         ball_swap(i-1, k);
         return false;
-    }else if(acp == 2){
-        swap(ball[i][k], ball[i+1][k+1]);
-        ans_writer(i, k, i+1, k+1);
-        return false;
-    }else if(acp == 3){
-        swap(ball[i][k], ball[i+1][k]);
-        ans_writer(i, k, i+1, k);
-        return false;
-    }
+    }    
     return true;
 }
 
+
+void print_dp(vector<vector<pair<int, int>>> &vec){
+    rep(i, N){
+        rep(k, N){
+            if(vec[i][k].first == N_INF) cout << "----- ";
+            else cout << vec[i][k].first << "-" << vec[i][k].second << " ";
+        }
+        print(" ");
+    }
+}
+
+// なんでビムサしようとしてDP書いてるんですか？？？アホ？？？？？？？？？？？？？？？？
+void beam(int start_i, int start_k){
+    vector<vector<pair<int, int>>> dp(N, vector<pair<int, int>>(N, {N_INF, INF}));
+    dp[start_i][start_k] = {0, -1};
+    stack<tuple<int, int, int, int>> st;
+    int top = -1;
+    set<int> end;
+
+    for(int to_top = N-1; to_top >= 0; to_top--){
+        top = to_top;
+        rep(to_side, N){
+            bool flag = false;
+            if(dp[to_top][to_side].first == N_INF)continue;
+            if(to_top > 0 && to_side > 0){
+                if(ball[start_i][start_k] < ball[to_top-1][to_side-1]) {
+                    flag = true;
+                    if(chmax(dp[to_top-1][to_side-1].first, dp[to_top][to_side].first + power(abs(ball[start_i][start_k] - ball[to_top-1][to_side-1]), 1))){
+                        dp[to_top-1][to_side-1].second = to_side;
+                    }
+                }
+            }
+            if(to_top > 0 && ball[to_top-1][to_side] != INF){
+                if(ball[start_i][start_k] < ball[to_top-1][to_side]) {
+                    flag = true;
+                    if(chmax(dp[to_top-1][to_side].first, dp[to_top][to_side].first + power(abs(ball[start_i][start_k] - ball[to_top-1][to_side]), 1))){
+                        dp[to_top-1][to_side].second = to_side;
+                    }
+                }
+            }
+            if(!flag) {end.insert(to_side);}
+        }
+        if(!end.empty())break;
+    } 
+  
+    int next_k, start_max = N_INF+1;
+    if(top == -1) {
+        // print(ball[start_i][start_k]);
+        return;
+    }
+
+    for(int i = 0; i < N; i++){
+        if(end.count(i)==1)if(chmax(start_max, dp[top][i].first)) next_k = i;
+    }
+    for(int i = top; i < N-1; i++){
+        if(dp[i][next_k].second == -1)break;
+        st.push({i, next_k, i+1 ,dp[i][next_k].second});
+        next_k = dp[i][next_k].second;
+    }
+    while(!st.empty()){
+        auto p = st.top();
+        st.pop();
+/*         print(get<0>(p) << " " << get<1>(p) << " "<<  get<2>(p) << " "<< get<3>(p)); */
+        ans_writer(get<0>(p), get<1>(p), get<2>(p), get<3>(p));
+        swap(ball[get<0>(p)][get<1>(p)], ball[get<2>(p)][get<3>(p)]);
+    }
+}
 
 void solve() {
     // hogehoge
@@ -104,23 +158,21 @@ void solve() {
             cin >> ball[i][k];
         }
     } 
-
-    int now = 0; 
-    while(true){
-        rep(now, 465){
-            rep(i, N){
-                rep(k, i+1){
-                    if(ball[i][k] == now){
-                        if(now == ball[i][k]){
-                            ball_swap(i, k);
-                        }
+    // while(true){
+    rep(now, 465){
+        rep(i, N){
+            rep(k, i+1){
+                if(ball[i][k] == now){
+                    if(now == ball[i][k]){
+                        beam(i, k);
                     }
                 }
             }
-        } 
-        end = std::chrono::system_clock::now();
-        double elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(end-start).count();
-        if(elapsed > LMT) break;
+        }
+    // } 
+    end = std::chrono::system_clock::now();
+    double elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(end-start).count(); //処理に要した時間をミリ秒に変換}
+    if(elapsed > LMT) break;
     }
     output();
 }
