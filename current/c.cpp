@@ -22,21 +22,26 @@ int b_search(vector<int>& v, int k) { int ng = -1, ok = v.size(); while (abs(ng 
 void solve() {
     // hogehoge
     int N;
-    string S;
-    cin >> N >> S;
-    stack<int> st;
-    rep(i, N){
-        // print(S);
-        if(S[i] == '(') st.push(i);
-        else if (S[i] == ')' && !st.empty()) {
-            S.erase(S.begin()+st.top(), S.begin()+i+1);
-            st.pop();
-            int tmp = N;
-            N = S.length();
-            i -= (tmp - N);
-        }
+    cin >> N;
+    vector<pair<pair<int, int>, int>>  vec(N);
+    for(int i=0; i<N; ++i){
+        int a, b;
+        cin >> a >> b;
+        vec[i] = { {a, a+b}, i+1};
     }
-    print(S);
+
+    sort(vec.begin(), vec.end(), [](const auto& a, const auto& b) {
+        if(a.first.first * b.first.second != b.first.first * a.first.second) {
+            return a.first.first * b.first.second > b.first.first * a.first.second;
+        } else {
+            return a.second < b.second;
+        }
+    });
+
+    for(auto p: vec){
+        cout << p.second << " ";
+    } 
+    cout << endl;
 }
 
 signed main() {

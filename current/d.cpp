@@ -4,9 +4,7 @@
 #define print(x) cout << x << endl
 const int INF = LLONG_MAX;
 const int N_INF = LLONG_MIN;
-
 using namespace std;
-
 class UnionFind { 
     private: vector<int> uf;
     public:
@@ -21,30 +19,41 @@ bool chmax(int &a, int b) { if (a < b) { a = b; return true; } return false; }
 int power(int base, int exponent) {int result = 1;for (int i = 0; i < exponent; i++) result *= base; return result; }
 int b_search(vector<int>& v, int k) { int ng = -1, ok = v.size(); while (abs(ng - ok) > 1) { int mid = ok + (ng - ok) / 2; if (v[mid] >= k) ok = mid; else ng = mid; } return ok; }
 
+int H, W;
+vector<string> vec;
+char ck[5] = {'s', 'n', 'u', 'k', 'e'};
+
+vector<vector<bool>> ed(501, vector<bool>(501, false));
+
+bool dfs(int cnt, int x, int y){
+    if(ed[x][y]) return false; 
+    ed[x][y] = true; 
+    bool ans = false;
+    if(x == H-1 && y == W-1)return true;
+    if(x != 0) if(vec[x-1][y] == ck[(cnt+1) % 5]) ans = (ans || dfs(cnt+1, x-1, y));
+    if(y != 0) if(vec[x][y-1] == ck[(cnt+1) % 5]) ans = (ans || dfs(cnt+1, x, y-1));
+    if(x != H-1) if(vec[x+1][y] == ck[(cnt+1) % 5]) ans = (ans || dfs(cnt+1, x+1, y));
+    if(y != W-1) if(vec[x][y+1] == ck[(cnt+1) % 5]) ans = (ans || dfs(cnt+1, x, y+1));
+    return ans;
+}
+
 void solve() {
     // hogehoge
-    string S;
-    cin >> S;
-    stack<int> stk;
-    map<int, set<char>> scope;
-    int current = 0;
-    rep(i, S.size()){
-        if(S[i] == '('){
-            stk.push(i);
-            scope[current+1] = scope[current];
-            current++;
-        }else if(S[i] == ')'){
-            scope[current].clear();
-            current--;
-        }else{
-            if(scope[current].count(S[i]) == 0) scope[current].insert(S[i]);
-            else {
-                print("No");
-                return;
-            }
-        }
+    cin >> H >> W;
+    vec.resize(H);
+    rep(i, H)cin >> vec[i];
+    bool ans = false;
+
+    if(vec[0][0] == ck[0]){
+        bool ck1 = false, ck2 = false;
+        if(vec[1][0] == ck[1]) ck1 = dfs(1, 1, 0);
+        if(vec[0][1] == ck[1]) ck2 = dfs(1, 0, 1);
+        ans = ck1 || ck2;
     }
-    print("Yes");
+
+    if(ans)print("Yes");
+    else print("No");
+
 }
 
 signed main() {

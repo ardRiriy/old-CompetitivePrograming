@@ -16,6 +16,7 @@ class UnionFind {
 };
 bool chmin(int &a, int b) { if (a > b) { a = b; return true; } return false; }
 bool chmax(int &a, int b) { if (a < b) { a = b; return true; } return false; }
+int power(int base, int exponent) {if(exponent == 0) return 1; int result = 1; for (int i = 0; i < exponent; i++) result *= base; return result; }
 int b_search(vector<int>& v, int k) { int ng = -1, ok = v.size(); while (abs(ng - ok) > 1) { int mid = ok + (ng - ok) / 2; if (v[mid] >= k) ok = mid; else ng = mid; } return ok; }
 
 void solve() {
@@ -23,8 +24,22 @@ void solve() {
     string S;
     int N;
     cin >> S >> N;
-    bitset<65> bs(0);
-    unordered_set<int> st;
+    int sum = 0;
+    rep(i, S.size()){
+        if(S[i] == '?')continue;
+        else if(S[i] == '1'){
+            sum += power(2, S.size() - i - 1);
+        }
+    }
+    rep(i, S.size()){
+        if(S[i] == '?'){
+            int add = power(2, S.size() - i - 1);
+/*             print(S.size() - i - 1 << " " << add); */
+            if(sum + add <= N) sum += add;
+        }
+    }
+    if(sum <= N) print(sum);
+    else print(-1);
 }
 
 signed main() {

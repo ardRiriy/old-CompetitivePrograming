@@ -4,9 +4,7 @@
 #define print(x) cout << x << endl
 const int INF = LLONG_MAX;
 const int N_INF = LLONG_MIN;
-
 using namespace std;
-
 class UnionFind { 
     private: vector<int> uf;
     public:
@@ -21,19 +19,59 @@ bool chmax(int &a, int b) { if (a < b) { a = b; return true; } return false; }
 int power(int base, int exponent) {int result = 1;for (int i = 0; i < exponent; i++) result *= base; return result; }
 int b_search(vector<int>& v, int k) { int ng = -1, ok = v.size(); while (abs(ng - ok) > 1) { int mid = ok + (ng - ok) / 2; if (v[mid] >= k) ok = mid; else ng = mid; } return ok; }
 
+int mex(int a, int b, int c){
+    rep(i, 3){
+        if(a != i && b != i && c!= i)return i;
+    }
+    return 3;
+}
+
 void solve() {
-    while(true){
-    int n;
-    cin >> n;
-    if(n==0)return;
-    int d[n];
-    rep(i, n) cin >> d[i];
+    // hogehoge
+    int N;
+    cin >> N;
+    vector<int> A(N);
+    rep(i, N) cin >> A[i];
+    string S;
+    cin >> S;
+
+    vector<vector<int>> M(3), E(3), X(3);
+
+    rep(i, N){
+        if(S[i] == 'M'){
+            M[A[i]].push_back(i);
+        }
+        else if(S[i] == 'E'){
+            E[A[i]].push_back(i);
+        }
+        else if(S[i] == 'X'){
+            X[A[i]].push_back(i);
+        }
+    }
+
     int ans = 0;
-    rep(i, n-3){
-        if(d[i] == 2 && d[i+1] == 0 && d[i+2] == 2 && d[i+3] == 0)ans++;
+
+    rep(i, 3){
+        rep(k, 3){
+            rep(l, 3){
+                if(i != 0 && k != 0 && l != 0) continue;
+                for(int q: M[i]){
+                    int idx_e = b_search(E[k], q);
+                    if(idx_e == E[k].size()) continue;
+
+                    for(int kk = idx_e; kk < E[k].size(); kk++){
+                        int idx_x = b_search(X[l], E[k][kk]);
+                        if(idx_x == X[l].size())continue;
+
+                        ans += (X[l].size() - idx_x ) * mex(i, k, l);
+                        // print(idx_x << X[l].size() << " " << mex(i, k, l) << i << k << l);
+                    }
+                }
+            }
+        }
     }
     print(ans);
-    }
+
 }
 
 signed main() {

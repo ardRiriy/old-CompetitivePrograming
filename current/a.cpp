@@ -4,9 +4,7 @@
 #define print(x) cout << x << endl
 const int INF = LLONG_MAX;
 const int N_INF = LLONG_MIN;
-
 using namespace std;
-
 class UnionFind { 
     private: vector<int> uf;
     public:
@@ -23,25 +21,13 @@ int b_search(vector<int>& v, int k) { int ng = -1, ok = v.size(); while (abs(ng 
 
 void solve() {
     // hogehoge
-    string S;
-    cin >> S;
-    stack<int> stk;
-    map<int, set<char>> scope;
-    int current = 0;
-    rep(i, S.size()){
-        if(S[i] == '('){
-            stk.push(i);
-            scope[current+1] = scope[current];
-            current++;
-        }else if(S[i] == ')'){
-            scope[current].clear();
-            current--;
-        }else{
-            if(scope[current].count(S[i]) == 0) scope[current].insert(S[i]);
-            else {
-                print("No");
-                return;
-            }
+    int S[8];
+    rep(i, 8) cin>>S[i];
+
+    rep(i, 7){
+        if(!(S[i] <= S[i+1] && S[i]%25 == 0 && S[i+1] %25 == 0 && S[i] >= 100 && S[i+1] >= 100 && S[i] <= 675 && S[i+1] <= 675)){
+            print("No");
+            return;
         }
     }
     print("Yes");

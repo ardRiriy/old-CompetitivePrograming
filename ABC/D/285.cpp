@@ -4,9 +4,7 @@
 #define print(x) cout << x << endl
 const int INF = LLONG_MAX;
 const int N_INF = LLONG_MIN;
-
 using namespace std;
-
 class UnionFind { 
     private: vector<int> uf;
     public:
@@ -21,28 +19,43 @@ bool chmax(int &a, int b) { if (a < b) { a = b; return true; } return false; }
 int power(int base, int exponent) {int result = 1;for (int i = 0; i < exponent; i++) result *= base; return result; }
 int b_search(vector<int>& v, int k) { int ng = -1, ok = v.size(); while (abs(ng - ok) > 1) { int mid = ok + (ng - ok) / 2; if (v[mid] >= k) ok = mid; else ng = mid; } return ok; }
 
-
-
 void solve() {
     // hogehoge
-    while(true){
-        int m, n, p;
-        cin >> m >> n >>p;
-        if(m == 0) break;
-        set<int> st;
-        st.insert(p);
-        rep(i, n){
-            int a, b;
-            cin >> a>> b;
-            if(st.count(a) == 1 || st.count(b)==1){
-                st.insert(a);
-                st.insert(b);
-            }
+    int N;
+    map<string, int> mp;
+    int cnt = 1;
+    cin >> N;
+    vector<pair<int, int>> vec(N);
+    UnionFind uf(2*N+2);
+    rep(i, N){
+        string s1, s2;
+        cin >> s1 >> s2;
+        if(mp[s1] == 0){
+            mp[s1] = cnt;
+            cnt++;
         }
-        print(st.size());
+        if(mp[s2] == 0){
+            mp[s2] = cnt;
+            cnt++;
+        }
+        uf.marge(mp[s1], mp[s2]);
+        vec[i] = {mp[s1], mp[s2]};
     }
-}
 
+    map<int, int> degree;
+    rep(i, N){
+        degree[uf.root(vec[i].first)]++;
+    }
+
+    rep(i, N){
+        if(degree[i] == 0)continue;
+        if(degree[i] == uf.size(i)){
+            print("No");
+            return;
+        }
+    }
+    print("Yes");
+}
 
 signed main() {
     std::cout << std::fixed;
