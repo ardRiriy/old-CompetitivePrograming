@@ -1,48 +1,58 @@
 #include <bits/stdc++.h>
 #define int long long
 #define rep(i, n) for (int i = 0; i < (int)(n); i++)
+#define revrep(i, n) for (int i = (int)(n); i >= 0; i--)
+#define itrep(itr, stl) for(auto itr = stl.begin(); itr != stl.end(); itr++)
+#define Vec2D(type, n, m, val) vector<vector<type>>(n, vector<type>(m, val))
 #define print(x) cout << x << endl
 const int INF = LLONG_MAX;
 const int N_INF = LLONG_MIN;
 using namespace std;
 class UnionFind { 
-    private: vector<int> uf;
+    private: map<int, int> uf;
     public:
-    UnionFind(int size) : uf(size) { for (int i = 0; i < size; i++) uf[i] = -1; }
-    int root(int n) { if (uf[n] < 0) return n; else return uf[n] = root(uf[n]); }
+    int root(int n) { if (uf.find(n) == uf.end()) uf[n] = -1; if (uf[n] < 0) return n; else return uf[n] = root(uf[n]); }
     bool connected(int a, int b) { return root(a) == root(b); }
     void marge(int a, int b) { int root_a = root(a); int root_b = root(b); if (root_a != root_b) { if (uf[root_a] > uf[root_b]) swap(root_a, root_b); uf[root_a] += uf[root_b]; uf[root_b] = root_a; }}
     int size(int n) { return -uf[root(n)]; }
 };
 bool chmin(int &a, int b) { if (a > b) { a = b; return true; } return false; }
 bool chmax(int &a, int b) { if (a < b) { a = b; return true; } return false; }
-int power(int base, int exponent) {int result = 1;for (int i = 0; i < exponent; i++) result *= base; return result; }
+int power(int x, int n) { int result = 1; while(n > 0){ if((n & 1) == 1){ result *= x; } x *= x; n >>= 1; } return result; } /*x^nを計算*/
 int b_search(vector<int>& v, int k) { int ng = -1, ok = v.size(); while (abs(ng - ok) > 1) { int mid = ok + (ng - ok) / 2; if (v[mid] >= k) ok = mid; else ng = mid; } return ok; }
 
 void solve() {
     // hogehoge
-    int N, M;
-    cin >> N >> M;
-    string C[N];
-    rep(i, N) cin >> C[i];
+    int num, k;
+    cin >> num >> k;
+    vector<int> x(16, 0);
+       
+    {
+        int i = 0;
+        while(num != 0){
+            x[i] = num % 10;
+            num /= 10;
+            i++;
+        }
+    }
 
-    string D[M];
-    int p[M];
-    int p0;
-    rep(i, M) cin >> D[i];
-    cin >> p0;
-    rep(i, M) cin>>p[i];
-
+    rep(i, k){
+        int t = x[i];
+        x[i] = 0;
+        if(t >= 5){
+            for(int j = i+1; j < 16; j++){
+                x[j]++;
+                if(x[j] >= 10) x[j] %= 10;
+                else break;
+            }
+        }
+    }
     int ans = 0;
-
-    map<string, int> mp;
-    rep(i, M) mp[D[i]] = p[i];
-
-    rep(i, N){
-        if(mp[C[i]] == 0) ans += p0;
-        else ans += mp[C[i]];
+    rep(i, 16){
+        ans += power(10, i) * x[i];
     }
     print(ans);
+    
 }
 
 signed main() {

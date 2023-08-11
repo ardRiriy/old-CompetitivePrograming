@@ -3,6 +3,7 @@
 #define rep(i, n) for (int i = 0; i < (int)(n); i++)
 #define revrep(i, n) for (int i = (int)(n); i >= 0; i--)
 #define itrep(itr, stl) for(auto itr = stl.begin(); itr != stl.end(); itr++)
+#define Vec2D(type, n, m, val) vector<vector<type>>(n, vector<type>(m, val))
 #define print(x) cout << x << endl
 const int INF = LLONG_MAX;
 const int N_INF = LLONG_MIN;

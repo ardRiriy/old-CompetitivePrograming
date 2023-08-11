@@ -1,59 +1,106 @@
 #include <bits/stdc++.h>
 #define int long long
 #define rep(i, n) for (int i = 0; i < (int)(n); i++)
+#define revrep(i, n) for (int i = (int)(n); i >= 0; i--)
+#define itrep(itr, stl) for(auto itr = stl.begin(); itr != stl.end(); itr++)
+#define Vec2D(type, n, m, val) vector<vector<type>>(n, vector<type>(m, val))
 #define print(x) cout << x << endl
 const int INF = LLONG_MAX;
 const int N_INF = LLONG_MIN;
 using namespace std;
 class UnionFind { 
-    private: vector<int> uf;
+    private: map<int, int> uf;
     public:
-    UnionFind(int size) : uf(size) { for (int i = 0; i < size; i++) uf[i] = -1; }
-    int root(int n) { if (uf[n] < 0) return n; else return uf[n] = root(uf[n]); }
+    int root(int n) { if (uf.find(n) == uf.end()) uf[n] = -1; if (uf[n] < 0) return n; else return uf[n] = root(uf[n]); }
     bool connected(int a, int b) { return root(a) == root(b); }
     void marge(int a, int b) { int root_a = root(a); int root_b = root(b); if (root_a != root_b) { if (uf[root_a] > uf[root_b]) swap(root_a, root_b); uf[root_a] += uf[root_b]; uf[root_b] = root_a; }}
     int size(int n) { return -uf[root(n)]; }
 };
 bool chmin(int &a, int b) { if (a > b) { a = b; return true; } return false; }
 bool chmax(int &a, int b) { if (a < b) { a = b; return true; } return false; }
-int power(int base, int exponent) {int result = 1;for (int i = 0; i < exponent; i++) result *= base; return result; }
+int power(int x, int n) { int result = 1; while(n > 0){ if((n & 1) == 1){ result *= x; } x *= x; n >>= 1; } return result; } /*x^nを計算*/
 int b_search(vector<int>& v, int k) { int ng = -1, ok = v.size(); while (abs(ng - ok) > 1) { int mid = ok + (ng - ok) / 2; if (v[mid] >= k) ok = mid; else ng = mid; } return ok; }
 
-int H, W;
-vector<string> vec;
-char ck[5] = {'s', 'n', 'u', 'k', 'e'};
+// 辺の情報
+struct Edge
+{
+	// 行先
+	int to;
 
-vector<vector<bool>> ed(501, vector<bool>(501, false));
+	// コスト
+	int cost;
+};
 
-bool dfs(int cnt, int x, int y){
-    if(ed[x][y]) return false; 
-    ed[x][y] = true; 
-    bool ans = false;
-    if(x == H-1 && y == W-1)return true;
-    if(x != 0) if(vec[x-1][y] == ck[(cnt+1) % 5]) ans = (ans || dfs(cnt+1, x-1, y));
-    if(y != 0) if(vec[x][y-1] == ck[(cnt+1) % 5]) ans = (ans || dfs(cnt+1, x, y-1));
-    if(x != H-1) if(vec[x+1][y] == ck[(cnt+1) % 5]) ans = (ans || dfs(cnt+1, x+1, y));
-    if(y != W-1) if(vec[x][y+1] == ck[(cnt+1) % 5]) ans = (ans || dfs(cnt+1, x, y+1));
-    return ans;
+using Graph = std::vector<std::vector<Edge>>;
+
+// { distance, from }
+using Pair = std::pair<long long, int>;
+
+// ダイクストラ法 (1.1 基本実装)
+// distances は頂点数と同じサイズ, 全要素 INF で初期化しておく
+void Dijkstra(const Graph& graph, std::vector<long long>& distances, int startIndex)
+{
+	// 「現時点での最短距離, 頂点」の順に取り出す priority_queue
+	// デフォルトの priority_queue は降順に取り出すため std::greater を使う
+	std::priority_queue<Pair, std::vector<Pair>, std::greater<Pair>> q;
+	q.emplace((distances[startIndex] = 0), startIndex);
+
+	while (!q.empty())
+	{
+		const long long distance = q.top().first;
+		const int from = q.top().second;
+		q.pop();
+
+		// 最短距離でなければ処理しない
+		if (distances[from] < distance)
+		{
+			continue;
+		}
+
+		// 現在の頂点からの各辺について
+		for (const auto& edge : graph[from])
+		{
+			// to までの新しい距離
+			const long long d = (distances[from] + edge.cost);
+
+			// d が現在の記録より小さければ更新
+			if (d < distances[edge.to])
+			{
+				q.emplace((distances[edge.to] = d), edge.to);
+			}
+		}
+	}
 }
 
 void solve() {
     // hogehoge
-    cin >> H >> W;
-    vec.resize(H);
-    rep(i, H)cin >> vec[i];
-    bool ans = false;
+    int n1, n2, m;
+    cin >> n1 >> n2 >> m;
 
-    if(vec[0][0] == ck[0]){
-        bool ck1 = false, ck2 = false;
-        if(vec[1][0] == ck[1]) ck1 = dfs(1, 1, 0);
-        if(vec[0][1] == ck[1]) ck2 = dfs(1, 0, 1);
-        ans = ck1 || ck2;
+    Graph g(n1 + n2);
+
+    rep(i, m){
+        int a, b;
+        cin >> a >> b;
+        a--; b--;
+        g[a].push_back({b, 1});
+        g[b].push_back({a, 1});
+    }
+    vector<long long> dist1(n1+n2, INF), dist2(n1+n2, INF);
+    Dijkstra(g, dist1, 0);
+    Dijkstra(g, dist2, n1+n2-1);
+    int a1 = 0;
+    int a2 = 0;
+    rep(i, n1+n2){
+        if(dist1[i] == INF) continue;
+        chmax(a1, dist1[i]);
+    }
+    rep(i, n1+n2){
+        if(dist2[i] == INF) continue;
+        chmax(a2, dist2[i]);
     }
 
-    if(ans)print("Yes");
-    else print("No");
-
+    print(a1  + a2 + 1);
 }
 
 signed main() {
