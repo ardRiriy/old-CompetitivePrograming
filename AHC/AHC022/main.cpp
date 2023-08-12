@@ -9,7 +9,6 @@ const int INF = LLONG_MAX;
 const int LMT = 3600; // ミリ秒指定
 const int MEASURE_TIMES = 8; // 計る回数
 const int ACCEPTABLE_ERROR = 20; // 許容しうる温度の誤差(初期解)
-const int TEMPERATURE_WIDTH = 40;
 const int QUESTION_LIMIT = 10000;
 using namespace std;
 
@@ -43,51 +42,32 @@ int question(int wormhole, int y, int x){
     cin >> m;
     q_cnt++;
     // debug用(提出時につける)
-    // if(m ==  -1) exit(1);
+    /* if(m ==  -1) exit(1); */
     return m;
 }
 
-void decide_temperature(vector<vector<int>> &v, Pos first_pos){
-    int t = 1000;
-    queue<Pos> que;
-    que.push(first_pos);
-    Pos fake = {INF, INF};
-    que.push(fake);
-    auto ck = Vec2D(bool, v.size(), v.size(), false);
-    ck[first_pos.y][first_pos.x] = true;
+vector<int> memo(100, -1);
+int temperature_fanction(int x){
+    if(memo[x] != -1) return memo[x];
 
-    while(!que.empty()){
-        Pos now = que.front();
- 
-        que.pop();
-        if(now.x == INF){
-            t -= TEMPERATURE_WIDTH;
-            if(t < -1000) {
-                t *= (-1);
-            }
-            if(que.front().x == INF){
-                break;
-            }
-            que.push(fake);
-            continue;
-        }
-        
-        if(t >= 0)v[now.y][now.x] = t;
-        else v[now.y][now.x] = -t;
-        int dx[4] = {1, 0, -1, 0};
-        int dy[4] = {0, 1, 0, -1};
-        rep(i, 4){
-            if(now.x + dx[i] >= 0 && now.x + dx[i] <= v.size() - 1 && now.y + dy[i] >= 0 && now.y + dy[i] <= v.size()-1 ){
-                if(!ck[now.y + dy[i]][now.x + dx[i]]){
-                    ck[now.y + dy[i]][now.x + dx[i]] = true;
-                    que.push({now.y + dy[i], now.x + dx[i]});
-                }
-            }
+    int temp = -power(x, 2) + l * x;
+    temp = temp *  160 / 100;
+    print("# " << x << " " << temp);
+    memo[x] = min((int) 1000, max((int) 0, temp));
+    return memo[x];
+}
+
+void decide_temperature(vector<vector<int>> &v, Pos first_pos){
+    rep(i, l){
+        rep(j, l){
+            v[i][j] = (temperature_fanction(i) + temperature_fanction(j)) / 2;
         }
     }
 }
 
 int decide_exit(vector<int> &exits, int whormhole){
+
+
     int Q = 5;  
     int dx[5] = {1,-1, 0, 0, 0};
     int dy[5] = {0, 0, 1, -1, 0};
@@ -101,6 +81,12 @@ int decide_exit(vector<int> &exits, int whormhole){
             temp[i] += question(whormhole, dy[i], dx[i]);
             // debug用
             temp[i] += a[whormhole];
+            
+
+            cout << "# TP: " << whormhole << " ";
+            for(int i: exits) cout << i << " ";
+            print("");
+
         } 
         temp[i] = round(temp[i] / Q);
     }
