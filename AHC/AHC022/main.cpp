@@ -50,8 +50,9 @@ vector<int> memo(100, -1);
 int temperature_fanction(int x){
     if(memo[x] != -1) return memo[x];
 
-    int temp = -power(x, 2) + l * x;
-    temp = temp *  160 / 100;
+    int temp = -x * x + l * x;
+    int a = 4000 / l / l;
+    temp = temp * a;
     print("# " << x << " " << temp);
     memo[x] = min((int) 1000, max((int) 0, temp));
     return memo[x];
