@@ -7,8 +7,8 @@
 #define print(x) cout << x << endl
 const int INF = LLONG_MAX;
 const int LMT = 3600; // ミリ秒指定
-const int ACCEPTABLE_ERROR = 20; // 許容しうる温度の誤差(初期解)
 const int QUESTION_LIMIT = 10000;
+const bool DEBUG_MODE = false;
 using namespace std;
 
 bool chmin(int &a, int b) { if (a > b) { a = b; return true; } return false; }
@@ -40,15 +40,24 @@ void print_grid(vector<vector<int>> &v){
     }
 }
 
+void DEBUG_INPUT(){
+    if(!DEBUG_MODE) return;
+    a.resize(n);
+    rep(i, n) {
+        cin >> a[i];
+    }
+}
+
 int question(int wormhole, int y, int x){
     print(wormhole << " " << y << " " << x);
     int m;
-    /*0 -> sub 1 -> debug*/
-    int stat = 0;
     cin >> m;
     q_cnt++;
-    if(stat == 1) m += temperature[(exit_cell[a[wormhole]].y + y + l) % l][(exit_cell[a[wormhole]].x + x % l)];
-    if(m ==  -1) exit(1);
+    if(DEBUG_MODE) {
+        m += temperature[(exit_cell[a[wormhole]].y + y + l) % l][(exit_cell[a[wormhole]].x + x % l)];
+        m = max((int)0, min((int)1000, m));
+    }
+    else if(m ==  -1) exit(1);
     return m;
 }
 
@@ -86,7 +95,7 @@ void solve() {
     
     cin >> l >> n >> s;
 
-    MEASURE_TIMES = min(power((int)s / 10, 2), (int)8e3 / (9 * n));
+    MEASURE_TIMES = max((int)1, min(power((int)s / 10, 2), (int)8e3 / (9 * n))); 
     exit_cell.resize(n);
     temperature.resize(l, vector<int>(l, -1));
     
@@ -98,11 +107,7 @@ void solve() {
 
     print_grid(temperature);
 
-    // debug用(提出時に消す)
-/*     a.resize(n);
-    rep(i, n) cin >> a[i]; */
-
-    
+    DEBUG_INPUT();
     // 計測
     vector<int> ans(n, 0);
     vector<Results> rs(n);
