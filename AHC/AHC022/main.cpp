@@ -7,7 +7,6 @@
 #define print(x) cout << x << endl
 const int INF = LLONG_MAX;
 const int LMT = 3600; // ミリ秒指定
-const int MEASURE_TIMES = 8; // 計る回数
 const int ACCEPTABLE_ERROR = 20; // 許容しうる温度の誤差(初期解)
 const int QUESTION_LIMIT = 10000;
 using namespace std;
@@ -21,8 +20,13 @@ struct Pos{
     int x;
 };
 
+struct Results{
+    vector<int> t;
+};
+
 vector<int> a;
 vector<Pos> exit_cell;
+int MEASURE_TIMES; // 計る回数
 vector<vector<int>> temperature;
 int l, n, s;
 int q_cnt = 0;
@@ -39,10 +43,12 @@ void print_grid(vector<vector<int>> &v){
 int question(int wormhole, int y, int x){
     print(wormhole << " " << y << " " << x);
     int m;
+    /*0 -> sub 1 -> debug*/
+    int stat = 0;
     cin >> m;
     q_cnt++;
-    // debug用(提出時につける)
-    /* if(m ==  -1) exit(1); */
+    if(stat == 1) m += temperature[(exit_cell[a[wormhole]].y + y + l) % l][(exit_cell[a[wormhole]].x + x % l)];
+    if(m ==  -1) exit(1);
     return m;
 }
 
@@ -66,50 +72,11 @@ void decide_temperature(vector<vector<int>> &v, Pos first_pos){
     }
 }
 
-int decide_exit(vector<int> &exits, int whormhole){
-
-
-    int Q = 5;  
-    int dx[5] = {1,-1, 0, 0, 0};
-    int dy[5] = {0, 0, 1, -1, 0};
-    vector<int> temp(5, 0);
-
-    
-    //温度計測
-    rep(i, 5){
-        rep(j, Q){
-            if(q_cnt >= QUESTION_LIMIT) break;
-            temp[i] += question(whormhole, dy[i], dx[i]);
-            // debug用
-            temp[i] += a[whormhole];
-            
-
-            cout << "# TP: " << whormhole << " ";
-            for(int i: exits) cout << i << " ";
-            print("");
-
-        } 
-        temp[i] = round(temp[i] / Q);
-    }
-
-    int min_diff = INF;
-    int min_idx = 0;
-    rep(i, exits.size()){
-        int diff_sum = 0;
-        rep(j, 5){
-            int t_x =(exit_cell[exits[i]].y + dy[j]) % l;
-            int t_y = (exit_cell[exits[i]].x + dx[j]) % l;
-            if(t_x < 0) t_x += l;
-            if(t_y < 0) t_y += l;
-            diff_sum += abs(temperature[t_x][t_y] - temp[j]);
-        }
-        if(chmin(min_diff, diff_sum)){
-            min_idx = i;
-        }
-    }
-    return exits[min_idx];
+int temperature_diff(Results r1, Results r2){
+    int sum = 0;
+    rep(i, 9) sum += abs(r1.t[i] - r2.t[i]);
+    return sum;
 }
-
 
 void solve() {
     // hogehoge
@@ -119,6 +86,7 @@ void solve() {
     
     cin >> l >> n >> s;
 
+    MEASURE_TIMES = min(power((int)s / 10, 2), (int)8e3 / (9 * n));
     exit_cell.resize(n);
     temperature.resize(l, vector<int>(l, -1));
     
@@ -131,34 +99,37 @@ void solve() {
     print_grid(temperature);
 
     // debug用(提出時に消す)
-    a.resize(n);
-    rep(i, n) cin >> a[i];
+/*     a.resize(n);
+    rep(i, n) cin >> a[i]; */
 
     
     // 計測
-    vector<int> measure(n, 0), ans(n, 0);
-    map<int, vector<int>> list;
-
+    vector<int> ans(n, 0);
+    vector<Results> rs(n);
+    vector<Results> true_value(n);
+    int dy[9] = {0, -1, -1, -1, 0, 0, 1, 1, 1};
+    int dx[9] = {0, -1, 0, 1, -1, 1, -1, 0, 1};
     rep(i, n){
-        rep(j, MEASURE_TIMES){
-            if(q_cnt >= QUESTION_LIMIT) break;
-            measure[i] += question(i, 0, 0);
-            
-            // debug用 提出時に消す
-            measure[i] += temperature[exit_cell[a[i]].y][exit_cell[a[i]].x];
-
-        }
-        measure[i] = round(measure[i] / MEASURE_TIMES);
-
-        rep(j, n){
-            if(abs(temperature[exit_cell[j].y][exit_cell[j].x] - measure[i]) < ACCEPTABLE_ERROR){
-                list[i].push_back(j);
+        rs[i].t.resize(9, 0);
+        true_value[i].t.resize(9, 0);
+        rep(j, 9){
+            rep(k, MEASURE_TIMES){
+                rs[i].t[j] += question(i, dy[j], dx[j]);
             }
+            rs[i].t[j] = round(rs[i].t[j] / MEASURE_TIMES);
+            true_value[i].t[j] = temperature[(exit_cell[i].y + dy[j] + l) % l][(exit_cell[i].x + dx[j] + l) % l];
         }
     }
 
     rep(i, n){
-        if(list[i].size() != 0) ans[i] = decide_exit(list[i], i);
+        int minimam = 1e7;
+        int min_idx = -1;
+        rep(j, n){
+            if(chmin(minimam, temperature_diff(rs[i], true_value[j]))){
+                min_idx = j;
+            }
+        }
+        ans[i] = min_idx;
     }
 
     //回答
