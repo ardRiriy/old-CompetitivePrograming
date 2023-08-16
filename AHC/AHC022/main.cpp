@@ -8,6 +8,7 @@
 const int INF = LLONG_MAX;
 const int LMT = 3600; // ミリ秒指定
 const int QUESTION_LIMIT = 10000;
+const int BEAM_WITDH = 150;
 const bool DEBUG_MODE = true;
 using namespace std;
 
@@ -22,6 +23,12 @@ struct Pos{
 
 struct Results{
     vector<int> t;
+};
+
+struct Beam {
+    int evaluation;
+    vector<bool> state;
+    vector<int> correspondences;
 };
 
 vector<int> a;
@@ -68,7 +75,7 @@ int temperature_fanction(int x){
     double a = -4000.0 / l / l;
     double b = 4000.0 / l;
     int temp = a * x * x + round(b * x);
-    print("# " << a << " " << b << " "<< x << " " << temp);
+/*     print("# " << a << " " << b << " "<< x << " " << temp); */
     memo[x] = min((int) 1000, max((int) 0, temp));
     return memo[x];
 }
@@ -126,21 +133,66 @@ void solve() {
         }
     }
 
+
+    vector<Beam> beam_a, beam_b;
+    /*初期状態を作る*/
     rep(i, n){
-        int minimam = 1e7;
-        int min_idx = -1;
-        rep(j, n){
-            if(chmin(minimam, temperature_diff(rs[i], true_value[j]))){
-                min_idx = j;
+        Beam beam;
+        beam.evaluation = temperature_diff(rs[0], true_value[i]);
+        beam.state.resize(n, false);
+        beam.state[i] = true;
+        beam.correspondences.push_back({i});
+        beam_a.push_back(beam);
+    }
+
+    for(int i = 1; i < n; i++){
+        if(i % 2 == 1){
+            // beam_a -> beam_bに遷移
+            rep(j, min(BEAM_WITDH, (int)beam_a.size())){
+                rep(k, n){
+                    Beam tmp = beam_a[j];
+                    if(tmp.state[k]) continue;
+                    tmp.state[k] = true;
+                    tmp.correspondences.push_back(k);
+                    tmp.evaluation += temperature_diff(rs[i], true_value[k]);
+                    beam_b.push_back(tmp);
+                }
             }
+            sort(beam_b.begin(), beam_b.end(),
+                [](const Beam& a, const Beam& b) {
+                    return a.evaluation < b.evaluation; 
+                });
+            beam_a.clear();
+        }else{
+            // beam_b -> beam_aに遷移
+            rep(j, min(BEAM_WITDH, (int)beam_b.size())){
+                rep(k, n){
+                    Beam tmp = beam_b[j];
+                    if(tmp.state[k]) continue;
+                    tmp.state[k] = true;
+                    tmp.correspondences.push_back(k);
+                    tmp.evaluation += temperature_diff(rs[i], true_value[k]);
+                    beam_a.push_back(tmp);
+                }
+            }
+            sort(beam_a.begin(), beam_a.end(),
+                [](const Beam& a, const Beam& b) {
+                    return a.evaluation < b.evaluation; 
+                });
+            beam_b.clear();
         }
-        ans[i] = min_idx;
     }
 
     //回答
     print("-1 -1 -1");
-    rep(i, n){
-        print(ans[i]);
+    if(!beam_a.empty()){
+        rep(i, n){
+            print(beam_a[0].correspondences[i]);
+        }
+    }else{
+        rep(i, n){
+            print(beam_b[0].correspondences[i]);
+        }
     }
 }
 
