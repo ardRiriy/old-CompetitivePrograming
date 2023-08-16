@@ -8,8 +8,9 @@
 const int INF = LLONG_MAX;
 const int LMT = 3600; // ミリ秒指定
 const int QUESTION_LIMIT = 10000;
-const int BEAM_WITDH = 150;
-const bool DEBUG_MODE = true;
+const int BEAM_WITDH = 750;
+const bool DEBUG_MODE = false;
+const int MEASURE_NUM = 6;
 using namespace std;
 
 bool chmin(int &a, int b) { if (a > b) { a = b; return true; } return false; }
@@ -90,7 +91,7 @@ void decide_temperature(vector<vector<int>> &v, Pos first_pos){
 
 int temperature_diff(Results r1, Results r2){
     int sum = 0;
-    rep(i, 9) sum += abs(r1.t[i] - r2.t[i]);
+    rep(i, MEASURE_NUM) sum += abs(r1.t[i] - r2.t[i]);
     return sum;
 }
 
@@ -102,7 +103,7 @@ void solve() {
     
     cin >> l >> n >> s;
 
-    MEASURE_TIMES = max((int)1, min(power((int)s / 10, 2), (int)8e3 / (9 * n))); 
+    MEASURE_TIMES = max((int)1, min(power((int)s / 10, 2), (int)1e4 / (MEASURE_NUM * n))); 
     exit_cell.resize(n);
     temperature.resize(l, vector<int>(l, -1));
     
@@ -116,17 +117,18 @@ void solve() {
 
     DEBUG_INPUT();
     // 計測
-    vector<int> ans(n, 0);
     vector<Results> rs(n);
     vector<Results> true_value(n);
-    int dy[9] = {0, -1, -1, -1, 0, 0, 1, 1, 1};
-    int dx[9] = {0, -1, 0, 1, -1, 1, -1, 0, 1};
+    int dy[MEASURE_NUM] = {0, -2, -2, 0, 0, 2};
+    int dx[MEASURE_NUM] = {0, 0, 2, -2, 2, 0};
     rep(i, n){
-        rs[i].t.resize(9, 0);
-        true_value[i].t.resize(9, 0);
-        rep(j, 9){
+        rs[i].t.resize(MEASURE_NUM, 0);
+        rs[i].mid_value.resize(MEASURE_NUM, 0);
+        true_value[i].t.resize(MEASURE_NUM, 0);
+        rep(j, MEASURE_NUM){
             rep(k, MEASURE_TIMES){
-                rs[i].t[j] += question(i, dy[j], dx[j]);
+                int tmp = question(i, dy[j], dx[j]);
+                rs[i].t[j] += tmp;
             }
             rs[i].t[j] = round(rs[i].t[j] / MEASURE_TIMES);
             true_value[i].t[j] = temperature[(exit_cell[i].y + dy[j] + l) % l][(exit_cell[i].x + dx[j] + l) % l];
