@@ -123,7 +123,6 @@ void solve() {
     int dx[MEASURE_NUM] = {0, 0, 2, -2, 2, 0};
     rep(i, n){
         rs[i].t.resize(MEASURE_NUM, 0);
-        rs[i].mid_value.resize(MEASURE_NUM, 0);
         true_value[i].t.resize(MEASURE_NUM, 0);
         rep(j, MEASURE_NUM){
             rep(k, MEASURE_TIMES){
