@@ -8,7 +8,7 @@
 const int INF = LLONG_MAX;
 const int LMT = 3600; // ミリ秒指定
 const int QUESTION_LIMIT = 10000;
-const bool DEBUG_MODE = false;
+const bool DEBUG_MODE = true;
 using namespace std;
 
 bool chmin(int &a, int b) { if (a > b) { a = b; return true; } return false; }
@@ -65,10 +65,10 @@ vector<int> memo(100, -1);
 int temperature_fanction(int x){
     if(memo[x] != -1) return memo[x];
 
-    int temp = -x * x + l * x;
-    int a = 4000 / l / l;
-    temp = temp * a;
-    print("# " << x << " " << temp);
+    double a = -4000.0 / l / l;
+    double b = 4000.0 / l;
+    int temp = a * x * x + round(b * x);
+    print("# " << a << " " << b << " "<< x << " " << temp);
     memo[x] = min((int) 1000, max((int) 0, temp));
     return memo[x];
 }
