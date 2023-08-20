@@ -119,8 +119,9 @@ void solve() {
     // 計測
     vector<Results> rs(n);
     vector<Results> true_value(n);
-    int dy[MEASURE_NUM] = {0, -2, -2, 0, 0, 2};
-    int dx[MEASURE_NUM] = {0, 0, 2, -2, 2, 0};
+    int witdh = l / 4;
+    int dy[MEASURE_NUM] = {0, -witdh, -witdh, 0, 0, witdh};
+    int dx[MEASURE_NUM] = {0, 0, witdh, -witdh, witdh, 0};
     rep(i, n){
         rs[i].t.resize(MEASURE_NUM, 0);
         true_value[i].t.resize(MEASURE_NUM, 0);
