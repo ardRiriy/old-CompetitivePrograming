@@ -9,7 +9,7 @@ const int INF = LLONG_MAX;
 const int LMT = 3600; // ミリ秒指定
 const int QUESTION_LIMIT = 10000;
 const int BEAM_WITDH = 750;
-const bool DEBUG_MODE = false;
+const bool DEBUG_MODE = true;
 const int MEASURE_NUM = 6;
 using namespace std;
 

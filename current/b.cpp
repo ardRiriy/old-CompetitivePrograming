@@ -23,37 +23,20 @@ int b_search(vector<int>& v, int k) { int ng = -1, ok = v.size(); while (abs(ng 
 
 void solve() {
     // hogehoge
-    int num, k;
-    cin >> num >> k;
-    vector<int> x(16, 0);
-       
-    {
-        int i = 0;
-        while(num != 0){
-            x[i] = num % 10;
-            num /= 10;
-            i++;
+    int n;
+    cin >> n;
+    vector<int> a(n);
+    rep(i, n) cin >> a[i];
+    sort(a.begin(), a.end());
+    int k = a[0];
+    rep(i, n){
+        if(a[i] != k + i){
+            print(k + i);
+            return;
         }
     }
-
-    rep(i, k){
-        int t = x[i];
-        x[i] = 0;
-        if(t >= 5){
-            for(int j = i+1; j < 16; j++){
-                x[j]++;
-                if(x[j] >= 10) x[j] %= 10;
-                else break;
-            }
-        }
-    }
-    int ans = 0;
-    rep(i, 16){
-        ans += power(10, i) * x[i];
-    }
-    print(ans);
-    
 }
+
 
 signed main() {
     std::cout << std::fixed;

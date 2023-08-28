@@ -21,23 +21,38 @@ bool chmax(int &a, int b) { if (a < b) { a = b; return true; } return false; }
 int power(int x, int n) { int result = 1; while(n > 0){ if((n & 1) == 1){ result *= x; } x *= x; n >>= 1; } return result; } /*x^nを計算*/
 int b_search(vector<int>& v, int k) { int ng = -1, ok = v.size(); while (abs(ng - ok) > 1) { int mid = ok + (ng - ok) / 2; if (v[mid] >= k) ok = mid; else ng = mid; } return ok; }
 
+vector<vector<pair<int, int>>> edge;
+
+int dfs(int v, vector<bool> ck, int now){
+    ck[v] = true;
+    //print(v);
+    int res = 0;
+    for(auto e: edge[v]){
+        if(ck[e.first]) continue;
+        chmax(res, dfs(e.first, ck, e.second));
+    }
+    return res + now;
+}
+
 void solve() {
     // hogehoge
-    int n;
-    cin >> n;
-    set<int> st;
-    int now = 1;
-    while(true){
-        while (st.count(now) != 0){
-            now++;
-        }
-        print(now);
-        st.insert(now);
-        int l;
-        cin >> l;
-        if(l == 0) break;
-        else st.insert(l);
+    int n, m;
+    cin >> n >> m;
+    edge.resize(n);
+    rep(i, m){
+        int a, b, c;
+        cin >> a >> b >> c;
+        a--; b--;
+        edge[a].push_back({b, c});
+        edge[b].push_back({a, c});
     }
+    int ans = N_INF;
+    vector<bool> ck(n, false);
+    rep(i, n){
+        int res = dfs(i, ck, 0);
+        chmax(ans, res);
+    }
+    print(ans);
 }
 
 signed main() {
