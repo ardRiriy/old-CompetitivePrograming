@@ -5,6 +5,7 @@
 #define itrep(itr, stl) for(auto itr = stl.begin(); itr != stl.end(); itr++)
 #define Vec2D(type, n, m, val) vector<vector<type>>(n, vector<type>(m, val))
 #define print(x) cout << x << endl
+#define all(stl) a.begin(), a.end()
 const int INF = LLONG_MAX;
 const int N_INF = LLONG_MIN;
 using namespace std;
