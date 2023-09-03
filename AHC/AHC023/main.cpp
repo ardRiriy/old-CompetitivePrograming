@@ -24,7 +24,7 @@ bool chmax(int &a, int b) { if (a < b) { a = b; return true; } return false; }
  * 
  * delta >= 0 -> delta
  * delta < 0 -4delta
- * 関節点にはおいたらダメ -> lowlinkってやつですか(これもterryさんのブログで見たやつだな)(参考にしすぎでは？)(いつもお世話になっております(いいね欄含む))
+ * 関節点にはおいたらダメ -> lowlinkってやつですか(これもterryさんのブログで見たやつだな)(参考にしすぎでは？)(いつもRTお世話になっております)
  * 
  * 結構よくなった(13306975)
  * ----------------------------------------------------
@@ -53,6 +53,12 @@ bool chmax(int &a, int b) { if (a < b) { a = b; return true; } return false; }
  * 
  * - 確率で現在よりも後の月に植え付ける作物を先に植え付けてしまうのはどうか？
  *  - 基本的な狙いとしては配置場所がなくて数字が大きいものが置けなくなる(結果特に後半で空きスペースが増える)ことを防ぎたい気持ち
+ * 
+ * - 前半の方ほどデカい数字を先に置いたほうがよさげ？
+ *  - 先取してくる量を増やすか
+ * 
+ * - 道が確保できるなら別に手前にデカい数字が来てもいい
+ *  - 奥に小さい数字が来るのはうれしくない
  * -----------------------------------------------------
  * [改善中]
  * - isPlacable改善 -> ちょっと良くなった(14995525)
@@ -63,7 +69,19 @@ bool chmax(int &a, int b) { if (a < b) { a = b; return true; } return false; }
  *
  * - 隣接4マスに自分より先に収穫するものが入っていたら置かないようにした(dfsがうまくいかなかった顔)
  *  - 手元で534466017(!?!?!?) 
- *  - 暫定テストでも34730425
+ *  - 手元1000ケース: 895123592
+ *  - 暫定テスト: 34730425(https://atcoder.jp/contests/ahc023/submissions/45230794)
+ * 
+ * - とりあえず10か月先まで見て先取で置いてみる
+ *  - 手元1000ケース: 1196050467
+ *  - 暫定テスト: 34045100(https://atcoder.jp/contests/ahc023/submissions/45231216)
+ *  - ？＿？
+ * 
+ * >__< ← 行き詰ったからAzureでローカル実行環境を作ろうとしている顔
+ * よくわからんからデスクトップでGitPullすればいいかｗ
+ * 
+ * - 深さの再計算やめたら早くなった
+ *  - 点数は大して変わらなそうなので，早いほうが良いね
 */
 
 int h = 20, w = 20;
@@ -306,13 +324,31 @@ void solve() {
     rep(i, h) rep(j, w) if(depth[i][j] != INF) chmax(MOST_DEEP, depth[i][j]);
 
     vector<Plan> ans;
+
+    rep(i, t){
+        sort(data[i+1].begin(), data[i+1].end());
+    }
+
     for(int month = 1; month <= t;month++){
         //植付
 
+        // 先取植付フェーズ
+        for(int diff = min(month + 5 , t); diff > month; diff--){
+            rep(i, 10){
+                if(data[diff].empty() || data[month].empty()) continue;
+                auto max_now = *data[month].rbegin();
+                auto tmp = *data[diff].rbegin();
+                if(max_now.first < tmp.first){
+                    data[month].push_back(tmp);
+                    data[diff].pop_back();
+                }
+            }
+        }
+
         // 通常植付フェーズ
-        sort(data[month].rbegin(), data[month].rend());
-        for(auto c: data[month]){
-            update_depth({enter, 0});
+        double wit = max((double)MOST_DEEP / (t - month + 1), 1.0);
+        for(auto itr = data[month].rbegin(); itr != data[month].rend(); itr++){
+            auto c = *itr;
             auto g = make_linked_list();    
             LowLink lowlink(g);
             lowlink.build();
@@ -323,7 +359,7 @@ void solve() {
                 rep(j, w){
                     if(is_placable({i, j}, lowlink.articulation_point, c.first)){
                         int proceed_day = c.first - month;
-                        int t_v = abs(proceed_day - depth[i][j]);
+                        int t_v = abs(proceed_day * wit - depth[i][j]);
                         if(t_v >= 0 && t_v <= perf){
                             if(manhattan_distance_from_wall({i, j}) < manhattan_distance_from_wall(option));
                             option = {i, j};
@@ -335,7 +371,7 @@ void solve() {
 
             if(option.h != -1){
                 board[option.h][option.w] = c.second;
-                ans.push_back({board[option.h][option.w], option, sd[board[option.h][option.w]-1][0]});
+                ans.push_back({board[option.h][option.w], option, month});
             }
         }
 
