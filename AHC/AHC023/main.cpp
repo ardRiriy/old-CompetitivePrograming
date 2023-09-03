@@ -40,17 +40,29 @@ bool chmax(int &a, int b) { if (a < b) { a = b; return true; } return false; }
  * 
  * - isPlacableを改善
  *  - 「その位置よりも深い位置に，自分より先に収穫する値があってはいけない」みたいな． 
+ *
+ * - 貪欲だときつそう？
+ *  - まぁヒュだしな...
+ *  - やるならビムサな気がするけど，どうだろう 
+ * -----------------------------------------------------
+ * [改善中]
+ * - isPlacable改善 -> ちょっと良くなった(14995525)
+ *  - もっと深い位置まで検索したほうが良いんだろうけどいったんパス
+ * 
+ * - 気持ち置くめにおいてもいいことにした
+ *  - かなり改善(21122450)
 */
 
 int h = 20, w = 20;
+int t, enter;
 int dx[4] = {0, -1, 0 , 1};
 int dy[4] = {-1, 0, 1, 0};
 
 vector<vector<int>> south_water_route(h-1, vector<int>(w)); // そのマスの座標(i, j)の下に水路があるかどうか
 vector<vector<int>> east_water_route(h, vector<int>(w-1)); //そのマスの右に水路があるかどうか
-int t, enter;
 vector<vector<int>> board(h, vector<int>(w, -1));
 vector<vector<int>> depth(h, vector<int>(w, INF));
+vector<vector<int>> sd;
 
 
 void print_grid(vector<vector<int>>& vec){
@@ -145,13 +157,47 @@ class LowLink {
     }
 };
 
+bool is_through(int i, int j, int r){
+    int new_h = i + dy[r];
+    int new_w = j + dx[r];
 
-//ついでに連結リストを返す
-vector<vector<int>> update_depth(Pos start){
+    if (new_h < 0 || new_h >= h || new_w < 0 || new_w >= w) {
+        return false;
+    }
+
+    // 水路のチェック
+    if (r % 2 == 0) { // 上または下
+        if (south_water_route[min(i, new_h)][j] != 0) {
+            return false;
+        }
+    } else { // 左または右
+        if (east_water_route[i][min(j, new_w)] != 0) {
+            return false;
+        }
+    }
+    return true;
+}
+
+vector<vector<int>> make_linked_list(){
     vector<vector<int>> res(h * w);
+    rep(i,h){
+        rep(j, w){
+            rep(r, 4){
+                if(!is_through(i, j, r)) continue;
+                int new_h = i + dy[r];
+                int new_w = j + dx[r];
+                if(board[new_h][new_w] == -1) res[i * w + j].push_back(new_h * w + new_w);
+            }
+        }
+    }
+    return res;
+}
+
+
+void update_depth(Pos start){
     queue<pair<Pos, int>> que;
     fill(depth.begin(), depth.end(), vector<int>(w, INF));
-    int now = 1;
+    int now = 0;
     depth[start.h][start.w] = now;
     que.push({start, now});
 
@@ -160,34 +206,15 @@ vector<vector<int>> update_depth(Pos start){
         que.pop();
         Pos p = a.first;
         int n = a.second;
-
         rep(i, 4){
+            if(!is_through(p.h, p.w, i)) continue;
             int new_h = p.h + dy[i];
             int new_w = p.w + dx[i];
-
-            // 範囲外かどうかのチェック
-            if (new_h < 0 || new_h >= h || new_w < 0 || new_w >= w) {
-                continue;
-            }
-
-            // 水路のチェック
-            if (i % 2 == 0) { // 上または下
-                if (south_water_route[min(p.h, new_h)][p.w] != 0) {
-                    continue;
-                }
-            } else { // 左または右
-                if (east_water_route[p.h][min(p.w, new_w)] != 0) {
-                    continue;
-                }
-            }
 
             // boardのチェック
             if (board[new_h][new_w] != -1) {
                 continue;
             }
-
-            res[p.h * w + p.w].push_back(new_h * w + new_w);
-
             // depthの更新
             if (depth[new_h][new_w] == INF) {
                 que.push({{new_h, new_w}, n + 1});
@@ -195,7 +222,6 @@ vector<vector<int>> update_depth(Pos start){
             }
         }
     }
-    return res;
 }
 
 Pos max_in_depth(){
@@ -212,9 +238,23 @@ Pos max_in_depth(){
     return res;
 }
 
-bool is_placable(Pos p, vector<int> &v){
+bool is_placable(Pos p, vector<int> &v, int proceed_day){
     if(board[p.h][p.w] != -1 || depth[p.h][p.w] == INF || (p.h == enter && p.w ==  0)) return false;
-    
+
+    rep(i, 4){ 
+        // 範囲外かどうかのチェック
+        if(!is_through(p.h, p.w, i)) continue;
+
+        int next_h = p.h + dy[i];
+        int next_w = p.w + dx[i];
+        // boardのチェック
+        if (board[next_h][next_w] == -1) {
+            break;
+        }else if(depth[next_h][next_w] > depth[p.h][p.w] && sd[board[next_h][next_w]-1][1] < proceed_day){
+            return false;
+        }
+    }
+
     for(auto i: v) if(p.h * w + p.w == i) return false;
     return true;
 }
@@ -246,35 +286,37 @@ void solve() {
     int k;
     cin >> k;
     map<int, vector<pair<int, int>>> data;
-    vector<vector<int>> sd(k, vector<int>(2));
+    sd.resize(k, vector<int>(2));
     rep(i, k){
         cin >> sd[i][0] >> sd[i][1];
         data[sd[i][0]].push_back({sd[i][1], i+1});
     }
-
+    
+    board.resize(h, vector<int>(w, -1));
     update_depth({enter, 0});
+
     int MOST_DEEP = 1; 
     rep(i, h) rep(j, w) if(depth[i][j] != INF) chmax(MOST_DEEP, depth[i][j]);
 
     vector<Plan> ans;
     for(int month = 1; month <= t;month++){
         //植付
-        //print(wit);
         sort(data[month].rbegin(), data[month].rend());
         for(auto c: data[month]){
-            auto g = update_depth({enter, 0});    
+
+            update_depth({enter, 0});
+            auto g = make_linked_list();    
             LowLink lowlink(g);
             lowlink.build();
-            Pos option = {-1, -1};
-            int MOST_DEEP = 1; 
 
-            rep(i, h) rep(j, w) if(depth[i][j] != INF) chmax(MOST_DEEP, depth[i][j]);
+            Pos option = {-1, -1};
             int perf = 1e5;
             rep(i, h){
                 rep(j, w){
-                    if(is_placable({i, j}, lowlink.articulation_point)){
-                        int t_v = (c.first - month) - depth[i][j];
-                        if(t_v == 0 && t_v <= perf){
+                    if(is_placable({i, j}, lowlink.articulation_point, c.first)){
+                        int proceed_day = c.first - month;
+                        int t_v = proceed_day * 2 - depth[i][j];
+                        if(t_v >= 0 && t_v <= perf){
                             if(manhattan_distance_from_wall({i, j}) < manhattan_distance_from_wall(option));
                             option = {i, j};
                             perf = t_v;
@@ -287,6 +329,7 @@ void solve() {
                 board[option.h][option.w] = c.second;
             }
         }
+
         //収穫
         queue<Pos> que;
         que.push({enter, 0});
@@ -295,26 +338,12 @@ void solve() {
         while(!que.empty()){
             auto p = que.front();
             que.pop();
-            //print(p.h << " " << p.w);
             rep(i, 4){
+                if(!is_through(p.h, p.w, i)) continue;
+
                 int new_h = p.h + dy[i];
                 int new_w = p.w + dx[i];
-
-                // 範囲外かどうかのチェック
-                if (new_h < 0 || new_h >= h || new_w < 0 || new_w >= w) {
-                    continue;
-                }
                 if(isChecked[new_h][new_w]) continue;
-                // 水路のチェック
-                if (i % 2 == 0) { // 上または下
-                    if (south_water_route[min(p.h, new_h)][p.w] != 0) {
-                        continue;
-                    }
-                } else { // 左または右
-                    if (east_water_route[p.h][min(p.w, new_w)] != 0) {
-                        continue;
-                    }
-                }
                 // boardのチェック
                 int crop_num = board[new_h][new_w];
                 if (crop_num == -1) {
