@@ -24,7 +24,9 @@ bool chmax(int &a, int b) { if (a < b) { a = b; return true; } return false; }
  * 
  * delta >= 0 -> delta
  * delta < 0 -4delta
- * 関節点にはおいたらダメ -> lowlinkってやつですか(これもterryさんのブログで見たやつだな)(参考にしすぎでは？ｗ)(いつもお世話になっております(いいね欄含む))
+ * 関節点にはおいたらダメ -> lowlinkってやつですか(これもterryさんのブログで見たやつだな)(参考にしすぎでは？)(いつもお世話になっております(いいね欄含む))
+ * 結構よくなった(13306975	)
+ * ----------------------------------------------------
 */
 
 int h = 20, w = 20;
@@ -33,7 +35,7 @@ int dy[4] = {-1, 0, 1, 0};
 
 vector<vector<int>> south_water_route(h-1, vector<int>(w)); // そのマスの座標(i, j)の下に水路があるかどうか
 vector<vector<int>> east_water_route(h, vector<int>(w-1)); //そのマスの右に水路があるかどうか
-int t, i0;
+int t, enter;
 vector<vector<int>> board(h, vector<int>(w, -1));
 vector<vector<int>> depth(h, vector<int>(w, INF));
 
@@ -146,9 +148,6 @@ vector<vector<int>> update_depth(Pos start){
         Pos p = a.first;
         int n = a.second;
 
-        int dy[4] = {-1, 0, 1, 0};
-        int dx[4] = {0, -1, 0, 1};
-
         rep(i, 4){
             int new_h = p.h + dy[i];
             int new_w = p.w + dx[i];
@@ -174,7 +173,6 @@ vector<vector<int>> update_depth(Pos start){
                 continue;
             }
 
-            // ここで何か処理（例：結果配列に追加）
             res[p.h * w + p.w].push_back(new_h * w + new_w);
 
             // depthの更新
@@ -202,7 +200,8 @@ Pos max_in_depth(){
 }
 
 bool is_placable(Pos p, vector<int> &v){
-    if(board[p.h][p.w] != -1 || depth[p.h][p.w] == INF || (p.h == i0 && p.w ==  0)) return false;
+    if(board[p.h][p.w] != -1 || depth[p.h][p.w] == INF || (p.h == enter && p.w ==  0)) return false;
+    
     for(auto i: v) if(p.h * w + p.w == i) return false;
     return true;
 }
@@ -215,7 +214,10 @@ void solve() {
     // hogehoge
     std::chrono::system_clock::time_point  start, end;
     start = std::chrono::system_clock::now();
-    cin >> t >> h >> w >> i0;
+    cin >> t >> h >> w >> enter;
+
+    vector<vector<bool>> isChecked(h, vector<bool>(w, false));
+
     rep(i, h-1){
         string s;
         cin >> s;
@@ -237,27 +239,23 @@ void solve() {
         data[sd[i][0]].push_back({sd[i][1], i+1});
     }
 
-    update_depth({i0, 0});
-    //print_grid(depth);
+    update_depth({enter, 0});
     int MOST_DEEP = 1; 
     rep(i, h) rep(j, w) if(depth[i][j] != INF) chmax(MOST_DEEP, depth[i][j]);
+
     vector<Plan> ans;
-
-
-
     for(int month = 1; month <= t;month++){
         //植付
         //print(wit);
-        sort(data[month].begin(), data[month].end());
+        sort(data[month].rbegin(), data[month].rend());
         for(auto c: data[month]){
-            auto g = update_depth({i0, 0});    
+            auto g = update_depth({enter, 0});    
             LowLink lowlink(g);
             lowlink.build();
-
-            int MOST_DEEP = 1; 
-            rep(i, h) rep(j, w) if(depth[i][j] != INF) chmax(MOST_DEEP, depth[i][j]);
-            if(c.first - month > MOST_DEEP) continue; 
             Pos option = {-1, -1};
+            int MOST_DEEP = 1; 
+
+            rep(i, h) rep(j, w) if(depth[i][j] != INF) chmax(MOST_DEEP, depth[i][j]);
             int perf = 1e5;
             rep(i, h){
                 rep(j, w){
@@ -271,21 +269,20 @@ void solve() {
                     }         
                 }
             }
+
             if(option.h != -1){
                 board[option.h][option.w] = c.second;
             }
         }
         //収穫
         queue<Pos> que;
-        que.push({i0, 0});
+        que.push({enter, 0});
 
-        vector<vector<bool>> ck(h, vector<bool>(w, false));
+        fill(isChecked.begin(), isChecked.end(), vector<bool>(w, false));
         while(!que.empty()){
             auto p = que.front();
             que.pop();
             //print(p.h << " " << p.w);
-            int dy[4] = {-1, 0, 1, 0};
-            int dx[4] = {0, -1, 0, 1};
             rep(i, 4){
                 int new_h = p.h + dy[i];
                 int new_w = p.w + dx[i];
@@ -294,7 +291,7 @@ void solve() {
                 if (new_h < 0 || new_h >= h || new_w < 0 || new_w >= w) {
                     continue;
                 }
-                if(ck[new_h][new_w]) continue;
+                if(isChecked[new_h][new_w]) continue;
                 // 水路のチェック
                 if (i % 2 == 0) { // 上または下
                     if (south_water_route[min(p.h, new_h)][p.w] != 0) {
@@ -309,17 +306,17 @@ void solve() {
                 int crop_num = board[new_h][new_w];
                 if (crop_num == -1) {
                     que.push({new_h, new_w});
-                    ck[new_h][new_w] = true;
+                    isChecked[new_h][new_w] = true;
                 }else if(sd[crop_num-1][1] == month){
                     board[new_h][new_w] = -1;
                     ans.push_back({crop_num, {new_h, new_w}, sd[crop_num-1][0]});
                     que.push({new_h, new_w});
-                    ck[new_h][new_w] = true;
+                    isChecked[new_h][new_w] = true;
                 }else if(sd[crop_num-1][1] < month){
                     board[new_h][new_w] = -1;
-                    // ans.push_back({crop_num, {new_h, new_w}, sd[crop_num-1][0]});
+                    //ans.push_back({crop_num, {new_h, new_w}, sd[crop_num-1][0]});
                     que.push({new_h, new_w});
-                    ck[new_h][new_w] = true;
+                    isChecked[new_h][new_w] = true;
                 }
             }
         }
