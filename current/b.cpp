@@ -25,18 +25,25 @@ void solve() {
     // hogehoge
     int n;
     cin >> n;
-    vector<int> a(n);
-    rep(i, n) cin >> a[i];
-    sort(a.begin(), a.end());
-    int k = a[0];
-    rep(i, n){
-        if(a[i] != k + i){
-            print(k + i);
-            return;
+    auto vec = Vec2D(bool, 101, 101, false);
+    rep(_, n){
+        int a, b, c, d;
+        cin >> a >> b >> c >> d;
+        for(int i = a; i < b; i++){
+            for(int j = c; j < d; j++){
+                vec[i][j] = true;
+            }
         }
     }
-}
+    int ans = 0;
+    rep(i, 101){
+        rep(j, 101){
+            if(vec[i][j]) ans++;
+        }
+    }
+    print(ans);
 
+}
 
 signed main() {
     std::cout << std::fixed;

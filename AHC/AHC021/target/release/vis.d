@@ -1,1 +1,0 @@
-/home/ardririy/workspace/CompetitivePrograming/AHC/AHC021/target/release/vis: /home/ardririy/workspace/CompetitivePrograming/AHC/AHC021/src/bin/vis.rs /home/ardririy/workspace/CompetitivePrograming/AHC/AHC021/src/lib.rs

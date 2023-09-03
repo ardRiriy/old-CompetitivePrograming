@@ -21,74 +21,17 @@ bool chmax(int &a, int b) { if (a < b) { a = b; return true; } return false; }
 int power(int x, int n) { int result = 1; while(n > 0){ if((n & 1) == 1){ result *= x; } x *= x; n >>= 1; } return result; } /*x^nを計算*/
 int b_search(vector<int>& v, int k) { int ng = -1, ok = v.size(); while (abs(ng - ok) > 1) { int mid = ok + (ng - ok) / 2; if (v[mid] >= k) ok = mid; else ng = mid; } return ok; }
 
-
-// 辺の情報
-struct Edge
-{
-	// 行先
-	int to;
-
-	// コスト
-	int cost;
-};
-
-using Graph = std::vector<std::vector<Edge>>;
-
-// { distance, from }
-using Pair = std::pair<long long, int>;
-
-// ダイクストラ法 (1.1 基本実装)
-// distances は頂点数と同じサイズ, 全要素 INF で初期化しておく
-void Dijkstra(const Graph& graph, std::vector<long long>& distances, int startIndex)
-{
-	// 「現時点での最短距離, 頂点」の順に取り出す priority_queue
-	// デフォルトの priority_queue は降順に取り出すため std::greater を使う
-	std::priority_queue<Pair, std::vector<Pair>, std::greater<Pair>> q;
-	q.emplace((distances[startIndex] = 0), startIndex);
-
-	while (!q.empty())
-	{
-		const long long distance = q.top().first;
-		const int from = q.top().second;
-		q.pop();
-
-		// 最短距離でなければ処理しない
-		if (distances[from] < distance)
-		{
-			continue;
-		}
-
-		// 現在の頂点からの各辺について
-		for (const auto& edge : graph[from])
-		{
-			// to までの新しい距離
-			const long long d = (distances[from] + edge.cost);
-
-			// d が現在の記録より小さければ更新
-			if (d < distances[edge.to])
-			{
-				q.emplace((distances[edge.to] = d), edge.to);
-			}
-		}
-	}
-}
-
 void solve() {
     // hogehoge
-    int n, m;
-    cin >> n >> m;
-    Graph g(n);
-    rep(i, m){
-        int u, v;
-        cin >> u >> v;
-        g[u].push_back({v, 1});
+    int n, m, o;
+    cin >> n >> m >> o;
+    int ans = 0;
+    int now = m;
+    while(now <= n){
+        ans++;
+        now += o;
     }
-    int from, to;
-    cin >> from >> to;
-    vector<int> dist(n, INF);
-    Dijkstra(g, dist, from);
-    if(dist[to] <= 6) print("YES");
-    else print("NO");
+    print(ans);
 }
 
 signed main() {
@@ -96,7 +39,7 @@ signed main() {
     std::cout << std::setprecision(20);
     std::cin.tie(0)->sync_with_stdio(0);
     int times = 1;
-    cin >> times;
+    // cin >> times;
     while (times--) solve();
     return 0;
 }

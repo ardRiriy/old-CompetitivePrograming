@@ -5,56 +5,43 @@
 #define itrep(itr, stl) for(auto itr = stl.begin(); itr != stl.end(); itr++)
 #define Vec2D(type, n, m, val) vector<vector<type>>(n, vector<type>(m, val))
 #define print(x) cout << x << endl
-const int INF = LLONG_MAX;
+const int INF = 1e18;
 const int N_INF = LLONG_MIN;
 using namespace std;
-class UnionFind { 
-    private: map<int, int> uf;
-    public:
-    int root(int n) { if (uf.find(n) == uf.end()) uf[n] = -1; if (uf[n] < 0) return n; else return uf[n] = root(uf[n]); }
-    bool connected(int a, int b) { return root(a) == root(b); }
-    void marge(int a, int b) { int root_a = root(a); int root_b = root(b); if (root_a != root_b) { if (uf[root_a] > uf[root_b]) swap(root_a, root_b); uf[root_a] += uf[root_b]; uf[root_b] = root_a; }}
-    int size(int n) { return -uf[root(n)]; }
-};
-bool chmin(int &a, int b) { if (a > b) { a = b; return true; } return false; }
-bool chmax(int &a, int b) { if (a < b) { a = b; return true; } return false; }
-int power(int x, int n) { int result = 1; while(n > 0){ if((n & 1) == 1){ result *= x; } x *= x; n >>= 1; } return result; } /*x^nを計算*/
-int b_search(vector<int>& v, int k) { int ng = -1, ok = v.size(); while (abs(ng - ok) > 1) { int mid = ok + (ng - ok) / 2; if (v[mid] >= k) ok = mid; else ng = mid; } return ok; }
-
-int target;
-int n;
 
 void solve() {
     // hogehoge
+    int n;
     cin >> n;
-    int sum = 0;
-    int now = 0;
-    vector<int> x(n), y(n);
-    vector<int> z(n);
+    vector<vector<int>> d(n, vector<int>(n, 0));
     rep(i, n){
-        cin >> x[i] >> y[i] >> z[i];
-        sum += z[i];
-        if(x[i] > y[i]) now += z[i];
-    }
-    sum = (sum + 1) / 2;
-    if(sum <= now){
-        print(0);
-        return;
-    }
-    //print(now << " " << sum);
-    vector<int> dp(sum + 1, INF);
-    dp[now] = 0;
-    rep(i, n){
-        if(x[i] > y[i]) continue;
-        int get = z[i];
-        int cost = (y[i] - x[i]) / 2 + 1;
-        for(int j = sum; j >= 0; j--){
-            if(dp[j] == INF) continue;
-            int next = min(sum, j + get);
-            dp[next] = min(dp[next], dp[j] + cost);
+        for(int j = i + 1; j < n; j++){
+            cin >> d[i][j];
+            d[j][i] = d[i][j];
         }
     }
-    print(dp[sum]);
+
+    vector<vector<int>> dp(1 << n, vector<int>(n, -INF));
+
+    dp[0][0] = 0;
+
+    for(int i = 1; i < (1 << n); i++){
+        rep(j, n){
+            if (!(i >> j & 1)) continue; 
+            rep(k, n){
+                if(!(i >> k & 1) || k == j) continue;
+                if (dp[i ^ (1 << j)][k] == -INF) continue;
+                dp[i][j] = max(dp[i][j], dp[i ^ (1 << j)][k] + d[k][j]);
+            }
+        }
+    }
+    int ans = 0;
+    for(int i = 1; i < n; i++){
+        if(dp[(1 << n) - 1][i] < 0) continue;
+        ans= max(ans, dp[(1 << n) - 1][i]);
+    }
+    print(ans);
+
 }
 
 signed main() {

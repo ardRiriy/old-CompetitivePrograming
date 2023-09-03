@@ -8,49 +8,31 @@
 const int INF = LLONG_MAX;
 const int N_INF = LLONG_MIN;
 using namespace std;
-class UnionFind { 
-    private: map<int, int> uf;
-    public:
-    int root(int n) { if (uf.find(n) == uf.end()) uf[n] = -1; if (uf[n] < 0) return n; else return uf[n] = root(uf[n]); }
-    bool connected(int a, int b) { return root(a) == root(b); }
-    void marge(int a, int b) { int root_a = root(a); int root_b = root(b); if (root_a != root_b) { if (uf[root_a] > uf[root_b]) swap(root_a, root_b); uf[root_a] += uf[root_b]; uf[root_b] = root_a; }}
-    int size(int n) { return -uf[root(n)]; }
-};
-bool chmin(int &a, int b) { if (a > b) { a = b; return true; } return false; }
-bool chmax(int &a, int b) { if (a < b) { a = b; return true; } return false; }
-int power(int x, int n) { int result = 1; while(n > 0){ if((n & 1) == 1){ result *= x; } x *= x; n >>= 1; } return result; } /*x^nを計算*/
-int b_search(vector<int>& v, int k) { int ng = -1, ok = v.size(); while (abs(ng - ok) > 1) { int mid = ok + (ng - ok) / 2; if (v[mid] >= k) ok = mid; else ng = mid; } return ok; }
-
-vector<vector<pair<int, int>>> edge;
-
-int dfs(int v, vector<bool> ck, int now){
-    ck[v] = true;
-    //print(v);
-    int res = 0;
-    for(auto e: edge[v]){
-        if(ck[e.first]) continue;
-        chmax(res, dfs(e.first, ck, e.second));
-    }
-    return res + now;
-}
 
 void solve() {
     // hogehoge
-    int n, m;
-    cin >> n >> m;
-    edge.resize(n);
-    rep(i, m){
-        int a, b, c;
-        cin >> a >> b >> c;
-        a--; b--;
-        edge[a].push_back({b, c});
-        edge[b].push_back({a, c});
-    }
-    int ans = N_INF;
-    vector<bool> ck(n, false);
+    int n, d, p;
+    cin >> n >> d >> p;
+    vector<int> f(n);
+    rep(i, n) cin >> f[i];
+    sort(f.rbegin(), f.rend());
+    int ans = 0;
+    vector<int> f_sum(n+1);
+    f_sum[0] = 0;
     rep(i, n){
-        int res = dfs(i, ck, 0);
-        chmax(ans, res);
+        f_sum[i+1] = f_sum[i] + f[i];
+    }
+    // for(int i: f_sum) print(i);
+
+    rep(i, n){
+    //print(i << " " << ans << " " << f_sum[min(i+d, n)]  << " " << f_sum[i]);
+    
+        if(f_sum[min(i+d, n)] - f_sum[i] >= p) {
+            ans += p;
+            i+=(d-1);
+        }else{
+            ans += f[i];
+        }
     }
     print(ans);
 }
