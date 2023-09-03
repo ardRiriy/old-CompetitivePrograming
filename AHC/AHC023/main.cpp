@@ -31,9 +31,11 @@ bool chmax(int &a, int b) { if (a < b) { a = b; return true; } return false; }
  * [改善できそうなところ]
  * - 置く位置に制限をかける
  *  - 例えば，成長しきるまでにかかる日数 + 15の深さまでしか置けないとか
+ *  -> 没 これをすると深い位置の区画が腐ってしまう
  * 
  * - BFSの更新
  *  - これは実行時間がきついとか試行回数稼ぎたいとかの時にやる
+ *  -> DONE(というか，もろもろの改善と合わせてdepthは一回のみ更新に変わったので不要になった)
  *
  * - 月の後半のほうの配置
  *  - 最後のほうは適当においてもまぁまぁ行ける
@@ -44,6 +46,8 @@ bool chmax(int &a, int b) { if (a < b) { a = b; return true; } return false; }
  * - 貪欲だときつそう？
  *  - まぁヒュだしな...
  *  - やるならビムサな気がするけど，どうだろう 
+ * 
+ * - うまくいかないケースはだいたい奥のほうが腐ってる
  * -----------------------------------------------------
  * [改善中]
  * - isPlacable改善 -> ちょっと良くなった(14995525)
@@ -51,6 +55,10 @@ bool chmax(int &a, int b) { if (a < b) { a = b; return true; } return false; }
  * 
  * - 気持ち置くめにおいてもいいことにした
  *  - かなり改善(21122450)
+ *
+ * - 隣接4マスに自分より先に収穫するものが入っていたら置かないようにした(dfsがうまくいかなかった顔)
+ *  - 手元で534466017(!?!?!?) 
+ *  - 暫定テストでも34730425
 */
 
 int h = 20, w = 20;
@@ -157,9 +165,9 @@ class LowLink {
     }
 };
 
-bool is_through(int i, int j, int r){
-    int new_h = i + dy[r];
-    int new_w = j + dx[r];
+bool is_through(Pos p, int r){
+    int new_h = p.h + dy[r];
+    int new_w = p.w + dx[r];
 
     if (new_h < 0 || new_h >= h || new_w < 0 || new_w >= w) {
         return false;
@@ -167,11 +175,11 @@ bool is_through(int i, int j, int r){
 
     // 水路のチェック
     if (r % 2 == 0) { // 上または下
-        if (south_water_route[min(i, new_h)][j] != 0) {
+        if (south_water_route[min(p.h, new_h)][p.w] != 0) {
             return false;
         }
     } else { // 左または右
-        if (east_water_route[i][min(j, new_w)] != 0) {
+        if (east_water_route[p.h][min(p.w, new_w)] != 0) {
             return false;
         }
     }
@@ -183,7 +191,7 @@ vector<vector<int>> make_linked_list(){
     rep(i,h){
         rep(j, w){
             rep(r, 4){
-                if(!is_through(i, j, r)) continue;
+                if(!is_through({i, j}, r)) continue;
                 int new_h = i + dy[r];
                 int new_w = j + dx[r];
                 if(board[new_h][new_w] == -1) res[i * w + j].push_back(new_h * w + new_w);
@@ -207,7 +215,7 @@ void update_depth(Pos start){
         Pos p = a.first;
         int n = a.second;
         rep(i, 4){
-            if(!is_through(p.h, p.w, i)) continue;
+            if(!is_through(p, i)) continue;
             int new_h = p.h + dy[i];
             int new_w = p.w + dx[i];
 
@@ -238,22 +246,16 @@ Pos max_in_depth(){
     return res;
 }
 
+
 bool is_placable(Pos p, vector<int> &v, int proceed_day){
     if(board[p.h][p.w] != -1 || depth[p.h][p.w] == INF || (p.h == enter && p.w ==  0)) return false;
 
-    rep(i, 4){ 
-        // 範囲外かどうかのチェック
-        if(!is_through(p.h, p.w, i)) continue;
-
-        int next_h = p.h + dy[i];
-        int next_w = p.w + dx[i];
-        // boardのチェック
-        if (board[next_h][next_w] == -1) {
-            break;
-        }else if(depth[next_h][next_w] > depth[p.h][p.w] && sd[board[next_h][next_w]-1][1] < proceed_day){
-            return false;
-        }
+    rep(i, 4){
+        if(!is_through(p, i)) continue;
+        if(board[p.h + dy[i]][p.w + dx[i]] == -1) continue;
+        if(proceed_day > sd[board[p.h + dy[i]][p.w + dx[i]]-1][1]) return false;
     }
+
 
     for(auto i: v) if(p.h * w + p.w == i) return false;
     return true;
@@ -315,7 +317,7 @@ void solve() {
                 rep(j, w){
                     if(is_placable({i, j}, lowlink.articulation_point, c.first)){
                         int proceed_day = c.first - month;
-                        int t_v = proceed_day * 2 - depth[i][j];
+                        int t_v = abs(proceed_day - depth[i][j]);
                         if(t_v >= 0 && t_v <= perf){
                             if(manhattan_distance_from_wall({i, j}) < manhattan_distance_from_wall(option));
                             option = {i, j};
@@ -339,7 +341,7 @@ void solve() {
             auto p = que.front();
             que.pop();
             rep(i, 4){
-                if(!is_through(p.h, p.w, i)) continue;
+                if(!is_through(p, i)) continue;
 
                 int new_h = p.h + dy[i];
                 int new_w = p.w + dx[i];
@@ -356,7 +358,7 @@ void solve() {
                     isChecked[new_h][new_w] = true;
                 }else if(sd[crop_num-1][1] < month){
                     board[new_h][new_w] = -1;
-                    //ans.push_back({crop_num, {new_h, new_w}, sd[crop_num-1][0]});
+                    // ans.push_back({crop_num, {new_h, new_w}, sd[crop_num-1][0]});
                     que.push({new_h, new_w});
                     isChecked[new_h][new_w] = true;
                 }
