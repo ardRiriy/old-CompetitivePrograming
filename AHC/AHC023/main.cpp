@@ -137,6 +137,7 @@ vector<vector<int>> update_depth(Pos start){
     queue<pair<Pos, int>> que;
     fill(depth.begin(), depth.end(), vector<int>(w, INF));
     int now = 1;
+    depth[start.h][start.w] = now;
     que.push({start, now});
 
     while(!que.empty()){
@@ -144,38 +145,42 @@ vector<vector<int>> update_depth(Pos start){
         que.pop();
         Pos p = a.first;
         int n = a.second;
-        depth[p.h][p.w] = n;
 
-        // TODO: 行き詰ったらここを共通化する
-        // 右
-        if(p.w < w-1 && east_water_route[p.h][p.w] == 0 && board[p.h][p.w+1] == -1){
-            res[p.h * w + p.w].push_back(p.h * w + (p.w + 1));
-            if(depth[p.h][p.w+1] == INF){
-                que.push({{p.h, p.w+1}, n+1});
-                depth[p.h][p.w+1] = -1;
+        int dy[4] = {-1, 0, 1, 0};
+        int dx[4] = {0, -1, 0, 1};
+
+        rep(i, 4){
+            int new_h = p.h + dy[i];
+            int new_w = p.w + dx[i];
+
+            // 範囲外かどうかのチェック
+            if (new_h < 0 || new_h >= h || new_w < 0 || new_w >= w) {
+                continue;
             }
-        }
-        // 下
-        if(p.h < h-1 && south_water_route[p.h][p.w] == 0 && board[p.h+1][p.w] == -1){
-            res[p.h * w + p.w].push_back((p.h + 1) * w + p.w);
-            if(depth[p.h+1][p.w] == INF){
-                que.push({{p.h+1, p.w}, n+1});
-                depth[p.h+1][p.w] = -1;
+
+            // 水路のチェック
+            if (i % 2 == 0) { // 上または下
+                if (south_water_route[min(p.h, new_h)][p.w] != 0) {
+                    continue;
+                }
+            } else { // 左または右
+                if (east_water_route[p.h][min(p.w, new_w)] != 0) {
+                    continue;
+                }
             }
-        }
-        // 左
-        if(p.w > 0 && east_water_route[p.h][p.w - 1] == 0 && board[p.h][p.w-1] == -1){
-            res[p.h * w + p.w].push_back(p.h * w + (p.w - 1));
-            if(depth[p.h][p.w-1] == INF){
-                que.push({{p.h, p.w-1}, n+1});
-                depth[p.h][p.w-1] = -1;
+
+            // boardのチェック
+            if (board[new_h][new_w] != -1) {
+                continue;
             }
-        }
-        if(p.h > 0 && south_water_route[p.h - 1][p.w] == 0 && board[p.h - 1][p.w] == -1){
-            res[p.h * w + p.w].push_back((p.h - 1) * w + p.w);
-            if(depth[p.h-1][p.w] == INF){
-                que.push({{p.h-1, p.w}, n+1});
-                depth[p.h-1][p.w] = -1;
+
+            // ここで何か処理（例：結果配列に追加）
+            res[p.h * w + p.w].push_back(new_h * w + new_w);
+
+            // depthの更新
+            if (depth[new_h][new_w] == INF) {
+                que.push({{new_h, new_w}, n + 1});
+                depth[new_h][new_w] = n + 1;
             }
         }
     }
@@ -197,7 +202,7 @@ Pos max_in_depth(){
 }
 
 bool is_placable(Pos p, vector<int> &v){
-    if(board[p.h][p.w] != -1 || depth[p.h][p.w] == INF) return false;
+    if(board[p.h][p.w] != -1 || depth[p.h][p.w] == INF || (p.h == i0 && p.w ==  0)) return false;
     for(auto i: v) if(p.h * w + p.w == i) return false;
     return true;
 }
@@ -227,43 +232,91 @@ void solve() {
         cin >> sd[i][0] >> sd[i][1];
         data[sd[i][0]].push_back({sd[i][1], i+1});
     }
-    
+
+    update_depth({i0, 0});
+    //print_grid(depth);
+    int MOST_DEEP = 1; 
+    rep(i, h) rep(j, w) if(depth[i][j] != INF) chmax(MOST_DEEP, depth[i][j]);
     vector<Plan> ans;
-    rep(month, t){
-        //収穫
 
+
+
+    for(int month = 1; month <= t;month++){
         //植付
-        sort(data[month+1].rbegin(), data[month+1].rend());
-
-        for(auto c: data[month+1]){
+        //print(wit);
+        sort(data[month].begin(), data[month].end());
+        for(auto c: data[month]){
             auto g = update_depth({i0, 0});    
             LowLink lowlink(g);
             lowlink.build();
 
+            int MOST_DEEP = 1; 
+            Pos MOST_DEEP_POS;
+            rep(i, h) rep(j, w) if(depth[i][j] != INF) chmax(MOST_DEEP, depth[i][j]);
+            if(c.first - month > MOST_DEEP) continue; 
             Pos option = {-1, -1};
             int value = INF;
             rep(i, h){
                 rep(j, w){
                     if(is_placable({i, j}, lowlink.articulation_point)){
-                        int delta = depth[i][j] - (c.first - month);
-                            if(delta >= 0){
-                                if(chmin(value, delta)){
-                                option = {i, j};
-                            }else{
-                                delta *= (-2);
-                                if(chmin(value, delta)){
-                                    option = {i, j};
-                                }
-                            }
+                        int t_v = depth[i][j] - (c.first - month);
+                        if(t_v == 0){
+                            option = {i, j};
                         }
                     }         
                 }
             }
             if(option.h != -1){
                 board[option.h][option.w] = c.second;
-                ans.push_back({c.second, option, month+1});
             }
-        
+        }
+        //収穫
+        queue<Pos> que;
+        que.push({i0, 0});
+
+        vector<vector<bool>> ck(h, vector<bool>(w, false));
+        while(!que.empty()){
+            auto p = que.front();
+            que.pop();
+            //print(p.h << " " << p.w);
+            int dy[4] = {-1, 0, 1, 0};
+            int dx[4] = {0, -1, 0, 1};
+            rep(i, 4){
+                int new_h = p.h + dy[i];
+                int new_w = p.w + dx[i];
+
+                // 範囲外かどうかのチェック
+                if (new_h < 0 || new_h >= h || new_w < 0 || new_w >= w) {
+                    continue;
+                }
+                if(ck[new_h][new_w]) continue;
+                // 水路のチェック
+                if (i % 2 == 0) { // 上または下
+                    if (south_water_route[min(p.h, new_h)][p.w] != 0) {
+                        continue;
+                    }
+                } else { // 左または右
+                    if (east_water_route[p.h][min(p.w, new_w)] != 0) {
+                        continue;
+                    }
+                }
+                // boardのチェック
+                int crop_num = board[new_h][new_w];
+                if (crop_num == -1) {
+                    que.push({new_h, new_w});
+                    ck[new_h][new_w] = true;
+                }else if(sd[crop_num-1][1] == month){
+                    board[new_h][new_w] = -1;
+                    ans.push_back({crop_num, {new_h, new_w}, sd[crop_num-1][0]});
+                    que.push({new_h, new_w});
+                    ck[new_h][new_w] = true;
+                }else if(sd[crop_num-1][1] < month){
+                    board[new_h][new_w] = -1;
+                    // ans.push_back({crop_num, {new_h, new_w}, sd[crop_num-1][0]});
+                    que.push({new_h, new_w});
+                    ck[new_h][new_w] = true;
+                }
+            }
         }
     }
     print(ans.size());
