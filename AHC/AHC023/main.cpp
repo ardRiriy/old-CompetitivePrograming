@@ -48,6 +48,11 @@ bool chmax(int &a, int b) { if (a < b) { a = b; return true; } return false; }
  *  - やるならビムサな気がするけど，どうだろう 
  * 
  * - うまくいかないケースはだいたい奥のほうが腐ってる
+ * - 手前からBFSして決定してくのはどうか？
+ *  - 没 下がる(なぜ？)
+ * 
+ * - 確率で現在よりも後の月に植え付ける作物を先に植え付けてしまうのはどうか？
+ *  - 基本的な狙いとしては配置場所がなくて数字が大きいものが置けなくなる(結果特に後半で空きスペースが増える)ことを防ぎたい気持ち
  * -----------------------------------------------------
  * [改善中]
  * - isPlacable改善 -> ちょっと良くなった(14995525)
@@ -303,9 +308,10 @@ void solve() {
     vector<Plan> ans;
     for(int month = 1; month <= t;month++){
         //植付
+
+        // 通常植付フェーズ
         sort(data[month].rbegin(), data[month].rend());
         for(auto c: data[month]){
-
             update_depth({enter, 0});
             auto g = make_linked_list();    
             LowLink lowlink(g);
@@ -329,6 +335,7 @@ void solve() {
 
             if(option.h != -1){
                 board[option.h][option.w] = c.second;
+                ans.push_back({board[option.h][option.w], option, sd[board[option.h][option.w]-1][0]});
             }
         }
 
@@ -351,14 +358,8 @@ void solve() {
                 if (crop_num == -1) {
                     que.push({new_h, new_w});
                     isChecked[new_h][new_w] = true;
-                }else if(sd[crop_num-1][1] == month){
+                }else if(sd[crop_num-1][1] <= month){
                     board[new_h][new_w] = -1;
-                    ans.push_back({crop_num, {new_h, new_w}, sd[crop_num-1][0]});
-                    que.push({new_h, new_w});
-                    isChecked[new_h][new_w] = true;
-                }else if(sd[crop_num-1][1] < month){
-                    board[new_h][new_w] = -1;
-                    // ans.push_back({crop_num, {new_h, new_w}, sd[crop_num-1][0]});
                     que.push({new_h, new_w});
                     isChecked[new_h][new_w] = true;
                 }
