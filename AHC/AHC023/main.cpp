@@ -207,6 +207,10 @@ bool is_placable(Pos p, vector<int> &v){
     return true;
 }
 
+int manhattan_distance_from_wall(Pos p){
+    return pow(min(p.h, h - p.h), 2) + pow(min(p.w, w - p.h), 2);
+}
+
 void solve() {
     // hogehoge
     std::chrono::system_clock::time_point  start, end;
@@ -251,17 +255,18 @@ void solve() {
             lowlink.build();
 
             int MOST_DEEP = 1; 
-            Pos MOST_DEEP_POS;
             rep(i, h) rep(j, w) if(depth[i][j] != INF) chmax(MOST_DEEP, depth[i][j]);
             if(c.first - month > MOST_DEEP) continue; 
             Pos option = {-1, -1};
-            int value = INF;
+            int perf = 1e5;
             rep(i, h){
                 rep(j, w){
                     if(is_placable({i, j}, lowlink.articulation_point)){
-                        int t_v = depth[i][j] - (c.first - month);
-                        if(t_v == 0){
+                        int t_v = (c.first - month) - depth[i][j];
+                        if(t_v == 0 && t_v <= perf){
+                            if(manhattan_distance_from_wall({i, j}) < manhattan_distance_from_wall(option));
                             option = {i, j};
+                            perf = t_v;
                         }
                     }         
                 }
