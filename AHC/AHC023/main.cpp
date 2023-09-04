@@ -351,7 +351,6 @@ void solve() {
         // 通常植付フェーズ
         for(auto itr = data[month].rbegin(); itr != data[month].rend(); itr++){
             auto c = *itr;
-            update_depth({enter, 0});
             auto g = make_linked_list();    
             LowLink lowlink(g);
             lowlink.build();
