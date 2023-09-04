@@ -86,6 +86,10 @@ bool chmax(int &a, int b) { if (a < b) { a = b; return true; } return false; }
  * 
  * - デスクトップで1000ケース実行したら爆速になってワロタ
  *  - 今のところ提出の手元実行でかなり乖離があるから，あんまり提出結果は信用ならなそう(偏ってそう)
+ * 
+ * - ここのTwitter,なんとrevartすると消えます(当たり前)
+ * 
+ * - ビムサの実装で頭を狂わせてる
 */
 int h = 20, w = 20;
 int t, enter;
@@ -212,7 +216,7 @@ bool is_through(Pos p, int r){
     return true;
 }
 
-vector<vector<int>> make_linked_list(){
+vector<vector<int>> make_linked_list(vector<vector<int>> &bd){
     vector<vector<int>> res(h * w);
     rep(i,h){
         rep(j, w){
@@ -220,7 +224,7 @@ vector<vector<int>> make_linked_list(){
                 if(!is_through({i, j}, r)) continue;
                 int new_h = i + dy[r];
                 int new_w = j + dx[r];
-                if(board[new_h][new_w] == -1) res[i * w + j].push_back(new_h * w + new_w);
+                if(bd[new_h][new_w] == -1) res[i * w + j].push_back(new_h * w + new_w);
             }
         }
     }
@@ -228,7 +232,7 @@ vector<vector<int>> make_linked_list(){
 }
 
 
-void update_depth(Pos start){
+void update_depth(Pos start, vector<vector<int>>&bd){
     queue<pair<Pos, int>> que;
     fill(depth.begin(), depth.end(), vector<int>(w, INF));
     int now = 0;
@@ -246,7 +250,7 @@ void update_depth(Pos start){
             int new_w = p.w + dx[i];
 
             // boardのチェック
-            if (board[new_h][new_w] != -1) {
+            if (bd[new_h][new_w] != -1) {
                 continue;
             }
             // depthの更新
@@ -258,28 +262,13 @@ void update_depth(Pos start){
     }
 }
 
-Pos max_in_depth(){
-    int max = N_INF;
-    Pos res = {-1, -1};
-    rep(i, h){
-        rep(j, w){
-            if(board[i][j] == -1 && chmax(max, depth[i][j])){
-                res = {i, j};
-            }
-        }
-    }
-    if(res.h != -1)board[res.h][res.w] = 1;
-    return res;
-}
-
-
-bool is_placable(Pos p, vector<int> &v, int proceed_day){
-    if(board[p.h][p.w] != -1 || depth[p.h][p.w] == INF || (p.h == enter && p.w ==  0)) return false;
+bool is_placable(Pos p, vector<int> &v, int proceed_day, vector<vector<int>> &bd){
+    if(bd[p.h][p.w] != -1 || depth[p.h][p.w] == INF || (p.h == enter && p.w ==  0)) return false;
 
     rep(i, 4){
         if(!is_through(p, i)) continue;
-        if(board[p.h + dy[i]][p.w + dx[i]] == -1) continue;
-        if(proceed_day > sd[board[p.h + dy[i]][p.w + dx[i]]-1][1]) return false;
+        if(bd[p.h + dy[i]][p.w + dx[i]] == -1) continue;
+        if(proceed_day > sd[bd[p.h + dy[i]][p.w + dx[i]]-1][1]) return false;
     }
 
 
@@ -321,7 +310,7 @@ void solve() {
     }
     
     board.resize(h, vector<int>(w, -1));
-    update_depth({enter, 0});
+    update_depth({enter, 0}, board);
 
     int MOST_DEEP = 1; 
     rep(i, h) rep(j, w) if(depth[i][j] != INF) chmax(MOST_DEEP, depth[i][j]);
@@ -351,7 +340,7 @@ void solve() {
         // 通常植付フェーズ
         for(auto itr = data[month].rbegin(); itr != data[month].rend(); itr++){
             auto c = *itr;
-            auto g = make_linked_list();    
+            auto g = make_linked_list(board);    
             LowLink lowlink(g);
             lowlink.build();
 
@@ -359,7 +348,7 @@ void solve() {
             int perf = 1e5;
             rep(i, h){
                 rep(j, w){
-                    if(is_placable({i, j}, lowlink.articulation_point, c.first)){
+                    if(is_placable({i, j}, lowlink.articulation_point, c.first, board)){
                         int proceed_day = c.first - month;
                         int t_v = depth[i][j] - proceed_day;
                         if(t_v < 0) t_v *= (-2);
