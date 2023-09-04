@@ -76,14 +76,17 @@ bool chmax(int &a, int b) { if (a < b) { a = b; return true; } return false; }
  *  - 手元1000ケース: 1196050467
  *  - 暫定テスト: 34045100(https://atcoder.jp/contests/ahc023/submissions/45231216)
  *  - ？＿？
- * 
- * >__< ← 行き詰ったからAzureでローカル実行環境を作ろうとしている顔
- * よくわからんからデスクトップでGitPullすればいいかｗ
+ * ----------------------------------------------------------
+ * [Twitter] 
+ * - >__< ← 行き詰ったからAzureでローカル実行環境を作ろうとしている顔
+ *  よくわからんからデスクトップでGitPullすればいいかｗ
  * 
  * - 深さの再計算やめたら早くなった
  *  - 点数は大して変わらなそうなので，早いほうが良いね
+ * 
+ * - デスクトップで1000ケース実行したら爆速になってワロタ
+ *  - 今のところ提出の手元実行でかなり乖離があるから，あんまり提出結果は信用ならなそう(偏ってそう)
 */
-
 int h = 20, w = 20;
 int t, enter;
 int dx[4] = {0, -1, 0 , 1};
@@ -285,7 +288,7 @@ bool is_placable(Pos p, vector<int> &v, int proceed_day){
 }
 
 int manhattan_distance_from_wall(Pos p){
-    return pow(min(p.h, h - p.h), 2) + pow(min(p.w, w - p.h), 2);
+    return pow(enter - p.h, 2) + pow(p.w , 2);
 }
 
 void solve() {
@@ -333,8 +336,8 @@ void solve() {
         //植付
 
         // 先取植付フェーズ
-        for(int diff = min(month + 5 , t); diff > month; diff--){
-            rep(i, 10){
+        for(int diff = min(month + 2, t); diff > month; diff--){
+            rep(i, 2){
                 if(data[diff].empty() || data[month].empty()) continue;
                 auto max_now = *data[month].rbegin();
                 auto tmp = *data[diff].rbegin();
@@ -359,11 +362,14 @@ void solve() {
                 rep(j, w){
                     if(is_placable({i, j}, lowlink.articulation_point, c.first)){
                         int proceed_day = c.first - month;
-                        int t_v = abs(proceed_day * wit - depth[i][j]);
-                        if(t_v >= 0 && t_v <= perf){
-                            if(manhattan_distance_from_wall({i, j}) < manhattan_distance_from_wall(option));
+                        int t_v = depth[i][j] - proceed_day;
+                        if(t_v < 0) t_v *= (-4);
+                        if(chmin(perf, t_v)){
                             option = {i, j};
-                            perf = t_v;
+                        }else if(perf == t_v){
+                            if(manhattan_distance_from_wall({i, j}) < manhattan_distance_from_wall(option)){
+                                option = {i, j};
+                            }
                         }
                     }         
                 }
