@@ -367,11 +367,11 @@ void solve() {
                     if(is_placable({i, j}, lowlink.articulation_point, c.first)){
                         int proceed_day = c.first - month;
                         int t_v = depth[i][j] - proceed_day;
-                        if(t_v < 0) t_v *= (-4);
+                        if(t_v < 0) t_v *= (-2);
                         if(chmin(perf, t_v)){
                             option = {i, j};
                         }else if(perf == t_v){
-                            if(manhattan_distance_from_wall({i, j}) < manhattan_distance_from_wall(option)){
+                            if(depth[i][j] < depth[option.h][option.w]){
                                 option = {i, j};
                             }
                         }
