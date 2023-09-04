@@ -57,6 +57,13 @@ bool chmax(int &a, int b) { if (a < b) { a = b; return true; } return false; }
  *  
  * - 道が確保できるなら別に手前にデカい数字が来てもいい
  *  - 奥に小さい数字が来るのはうれしくない
+ * 
+ * - 適当配置のほうが強いなら，ランダムで座標決定-> placableなら置くでもいいかもしれない(ほんとに？)
+ *  - どうせ何が強いかわからないならやってみたほうが良いか
+ *  - なんか割と悪くない値出て草
+ *   - 「似通った値を近くに置く」が強くない，というか全体的にいろんな数字が広がってるほうが強い，のか？
+ *   - 実行回数ベースで，隣接4か所との差が小さくなるような場所を探して入れ替えるとか？
+ *   - 空きスペースの処理に困りそうだけど，やってみる価値はある
  * -----------------------------------------------------
  * [改善中]
  * - isPlacable改善 -> ちょっと良くなった(14995525)
@@ -95,6 +102,8 @@ bool chmax(int &a, int b) { if (a < b) { a = b; return true; } return false; }
  * - ビムサの実装で頭を狂わせてる
  * 
  * - え，何やっても点数伸びないですが
+ * 
+ * - え，クソ適当にいじってたら点数伸びましたけどもしかして配置適当なほうが強かったりしますか？
 */
 int h = 20, w = 20;
 int t, enter;
@@ -302,6 +311,11 @@ void solve() {
     start = std::chrono::system_clock::now();
     cin >> t >> h >> w >> enter;
 
+    std::mt19937 generator;
+    generator.seed(std::random_device()());
+    std::uniform_int_distribution<int> distribution(0, h-1);
+
+
     vector<vector<bool>> isChecked(h, vector<bool>(w, false));
 
     rep(i, h-1){
@@ -347,26 +361,26 @@ void solve() {
 
             Pos option = {-1, -1};
             int perf = 1e5;
-            rep(i, h){
-                rep(j, w){
-                    if(is_placable({i, j}, lowlink.articulation_point, c.first, board)){
-                        int t_v = calcu_value(c.second, {i, j});
-                        if(chmin(perf, t_v)){
-                            option = {i, j};
-                        }else if(perf == t_v){
-                            if(depth[i][j] < depth[option.h][option.w]){
-                                option = {i, j};
-                            }
-                        }
-                    }         
+            rep(_, 2000){
+                int i = distribution(generator);
+                int j = distribution(generator);
+                if(is_placable({i, j}, lowlink.articulation_point, c.first, board)){
+                    int t_v = calcu_value(c.second, {i, j});
+                    if(chmin(perf, t_v)){
+                        option = {i, j};
+                    }else if(perf == t_v){
+                        if(depth[i][j] < depth[option.h][option.w]){
+                        option = {i, j};
+                    }
+                    break;
+                    }
                 }
             }
-
             if(option.h != -1){
                 board[option.h][option.w] = c.second;
                 ans.push_back({board[option.h][option.w], option, month});
             }
-        }
+            }
 
         //収穫
         queue<Pos> que;
@@ -399,8 +413,6 @@ void solve() {
     rep(i, ans.size()){
         print(ans[i].i<< " " << ans[i].p.h << " " << ans[i].p.w << " " <<ans[i].s);
     }
-
-
 }
 
 signed main() {
