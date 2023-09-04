@@ -349,9 +349,9 @@ void solve() {
         }
 
         // 通常植付フェーズ
-        double wit = max((double)MOST_DEEP / (t - month + 1), 1.0);
         for(auto itr = data[month].rbegin(); itr != data[month].rend(); itr++){
             auto c = *itr;
+            update_depth({enter, 0});
             auto g = make_linked_list();    
             LowLink lowlink(g);
             lowlink.build();
