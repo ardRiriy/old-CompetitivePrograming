@@ -53,10 +53,8 @@ bool chmax(int &a, int b) { if (a < b) { a = b; return true; } return false; }
  * 
  * - 確率で現在よりも後の月に植え付ける作物を先に植え付けてしまうのはどうか？
  *  - 基本的な狙いとしては配置場所がなくて数字が大きいものが置けなくなる(結果特に後半で空きスペースが増える)ことを防ぎたい気持ち
- * 
- * - 前半の方ほどデカい数字を先に置いたほうがよさげ？
- *  - 先取してくる量を増やすか
- * 
+ *  - 点数が下がったので没
+ *  
  * - 道が確保できるなら別に手前にデカい数字が来てもいい
  *  - 奥に小さい数字が来るのはうれしくない
  * -----------------------------------------------------
@@ -76,6 +74,12 @@ bool chmax(int &a, int b) { if (a < b) { a = b; return true; } return false; }
  * 
  * - 先取しないほうが手元で高かった
  * ----------------------------------------------------------
+ * [わかったこと]
+ * - 貪欲だけなら，先に盤面においておくのは悪手
+ * 
+ * - とにかく処理する作物の数を増やしたい
+ *  - だいたい点数に比例する気がしている
+ * ----------------------------------------------------------
  * [Twitter] 
  * - >__< ← 行き詰ったからAzureでローカル実行環境を作ろうとしている顔
  *  よくわからんからデスクトップでGitPullすればいいかｗ
@@ -89,6 +93,8 @@ bool chmax(int &a, int b) { if (a < b) { a = b; return true; } return false; }
  * - ここのTwitter,なんとrevartすると消えます(当たり前)
  * 
  * - ビムサの実装で頭を狂わせてる
+ * 
+ * - え，何やっても点数伸びないですが
 */
 int h = 20, w = 20;
 int t, enter;
@@ -280,22 +286,14 @@ int manhattan_distance_from_wall(Pos p){
 }
 
 
+map<pair<int, pair<int, int>>, int> cv_memo;
 int calcu_value(int crop_num, Pos p){
-    int proceed_day = sd[crop_num - 1][1] - sd[crop_num - 1][0];
+    if(cv_memo[{crop_num, {p.h, p.w}}] != 0) return cv_memo[{crop_num, {p.h, p.w}}];
+    int proceed_day = sd[crop_num - 1][1];
     int t_v = depth[p.h][p.w] - proceed_day;
     if(t_v < 0) t_v *= (-2);
-
-    int penalty = 0;
-    rep(i, 4){
-        if(is_through(p, i)){
-            int next_h = p.h + dy[i];
-            int next_w = p.w + dx[i];
-            if(board[next_h][next_w] != -1){
-                penalty += sd[board[next_h][next_w] - 1][1] - sd[crop_num- 1][1];
-            }
-        }
-    }
-    return t_v + penalty;
+    cv_memo[{crop_num, {p.h, p.w}}] = t_v;
+    return cv_memo[{crop_num, {p.h, p.w}}];
 }
 
 void solve() {
