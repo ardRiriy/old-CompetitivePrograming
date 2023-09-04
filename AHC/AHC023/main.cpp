@@ -68,14 +68,13 @@ bool chmax(int &a, int b) { if (a < b) { a = b; return true; } return false; }
  *  - かなり改善(21122450)
  *
  * - 隣接4マスに自分より先に収穫するものが入っていたら置かないようにした(dfsがうまくいかなかった顔)
- *  - 手元で534466017(!?!?!?) 
- *  - 手元1000ケース: 895123592
  *  - 暫定テスト: 34730425(https://atcoder.jp/contests/ahc023/submissions/45230794)
  * 
  * - とりあえず10か月先まで見て先取で置いてみる
- *  - 手元1000ケース: 1196050467
  *  - 暫定テスト: 34045100(https://atcoder.jp/contests/ahc023/submissions/45231216)
  *  - ？＿？
+ * 
+ * - 先取しないほうが手元で高かった
  * ----------------------------------------------------------
  * [Twitter] 
  * - >__< ← 行き詰ったからAzureでローカル実行環境を作ろうとしている顔
@@ -280,6 +279,25 @@ int manhattan_distance_from_wall(Pos p){
     return pow(enter - p.h, 2) + pow(p.w , 2);
 }
 
+
+int calcu_value(int crop_num, Pos p){
+    int proceed_day = sd[crop_num - 1][1] - sd[crop_num - 1][0];
+    int t_v = depth[p.h][p.w] - proceed_day;
+    if(t_v < 0) t_v *= (-2);
+
+    int penalty = 0;
+    rep(i, 4){
+        if(is_through(p, i)){
+            int next_h = p.h + dy[i];
+            int next_w = p.w + dx[i];
+            if(board[next_h][next_w] != -1){
+                penalty += sd[board[next_h][next_w] - 1][1] - sd[crop_num- 1][1];
+            }
+        }
+    }
+    return t_v + penalty;
+}
+
 void solve() {
     // hogehoge
     std::chrono::system_clock::time_point  start, end;
@@ -322,21 +340,6 @@ void solve() {
     }
 
     for(int month = 1; month <= t;month++){
-        //植付
-
-        // 先取植付フェーズ
-        for(int diff = min(month + 2, t); diff > month; diff--){
-            rep(i, 2){
-                if(data[diff].empty() || data[month].empty()) continue;
-                auto max_now = *data[month].rbegin();
-                auto tmp = *data[diff].rbegin();
-                if(max_now.first < tmp.first){
-                    data[month].push_back(tmp);
-                    data[diff].pop_back();
-                }
-            }
-        }
-
         // 通常植付フェーズ
         for(auto itr = data[month].rbegin(); itr != data[month].rend(); itr++){
             auto c = *itr;
@@ -349,9 +352,7 @@ void solve() {
             rep(i, h){
                 rep(j, w){
                     if(is_placable({i, j}, lowlink.articulation_point, c.first, board)){
-                        int proceed_day = c.first - month;
-                        int t_v = depth[i][j] - proceed_day;
-                        if(t_v < 0) t_v *= (-2);
+                        int t_v = calcu_value(c.second, {i, j});
                         if(chmin(perf, t_v)){
                             option = {i, j};
                         }else if(perf == t_v){
