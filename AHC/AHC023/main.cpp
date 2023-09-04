@@ -104,6 +104,10 @@ bool chmax(int &a, int b) { if (a < b) { a = b; return true; } return false; }
  * - え，何やっても点数伸びないですが
  * 
  * - え，クソ適当にいじってたら点数伸びましたけどもしかして配置適当なほうが強かったりしますか？
+ * 
+ * - 何やってもバグらせる，才能かもしれん
+ * 
+ * - 思ったより実行時間に余裕があるので，BFSで入り口までの道まで行けるか判定するようにして焼き鈍しするのはありそう．あと評価関数をちゃんと作り直さないと...
 */
 int h = 20, w = 20;
 int t, enter;
@@ -361,7 +365,7 @@ void solve() {
 
             Pos option = {-1, -1};
             int perf = 1e5;
-            rep(_, 2000){
+            rep(_, 5000){
                 int i = distribution(generator);
                 int j = distribution(generator);
                 if(is_placable({i, j}, lowlink.articulation_point, c.first, board)){
@@ -371,8 +375,7 @@ void solve() {
                     }else if(perf == t_v){
                         if(depth[i][j] < depth[option.h][option.w]){
                         option = {i, j};
-                    }
-                    break;
+                        }
                     }
                 }
             }
@@ -380,7 +383,7 @@ void solve() {
                 board[option.h][option.w] = c.second;
                 ans.push_back({board[option.h][option.w], option, month});
             }
-            }
+        }
 
         //収穫
         queue<Pos> que;
