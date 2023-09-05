@@ -326,14 +326,17 @@ int manhattan_distance_from_wall(Pos p){
 }
 
 
-map<pair<int, pair<int, int>>, int> cv_memo;
-int calcu_value(int crop_num, Pos p){
-    if(cv_memo[{crop_num, {p.h, p.w}}] != 0) return cv_memo[{crop_num, {p.h, p.w}}];
-    int proceed_day = sd[crop_num - 1][1];
-    int t_v = depth[p.h][p.w] - proceed_day;
-    if(t_v < 0) t_v *= (-2);
-    cv_memo[{crop_num, {p.h, p.w}}] = t_v;
-    return cv_memo[{crop_num, {p.h, p.w}}];
+int calcu_value(int crop_num, Pos p, vector<vector<int>> bd){
+    int value = 0;
+    int proceed_day = sd[crop_num - 1][1] - sd[crop_num - 1][0];
+    rep(i, 4){
+        if(is_through(p, i)){
+            int nh = p.h + dy[i], nw = p.w + dx[i];
+            if(bd[nh][nw] == -1) value += proceed_day * 2;
+            else value += abs(sd[crop_num - 1][1] - sd[bd[nh][nw] - 1][1]);
+        }
+    }
+    return value;
 }
 
 void solve() {
@@ -396,7 +399,7 @@ void solve() {
                 rep(j, w){
                     if(is_placable({i, j}, lowlink.articulation_point, c.first, board)){
                         int proceed_day = c.first - month;
-                        int t_v = calcu_value(c.second, {i, j});
+                        int t_v = calcu_value(c.second, {i, j}, board);
                         if(t_v >= 0 && t_v <= perf){
                             if(manhattan_distance_from_wall({i, j}) < manhattan_distance_from_wall(option));
                             option = {i, j};
