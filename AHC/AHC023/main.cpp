@@ -392,11 +392,13 @@ void solve() {
         sort(data[i+1].begin(), data[i+1].end());
     }
 
+    vector<bool> is_placed(k+1, false);
     for(int month = 1; month <= t;month++){
         // 通常植付フェーズ
         vector<pair<int, Pos>> registered; /* (作物番号, 置かれてる座標) */
         for(auto itr = data[month].rbegin(); itr != data[month].rend(); itr++){
             auto c = *itr;
+            if(is_placed[c.second]) continue;
             auto g = make_linked_list(board);    
             LowLink lowlink(g);
             lowlink.build();
@@ -418,8 +420,8 @@ void solve() {
             }
             if(option.h != -1){
                 board[option.h][option.w] = c.second;
-                c.first = -1;
                 registered.push_back({c.second, option});
+                is_placed[c.second] = true;
             }
         }
         rep(_, 1000){
@@ -459,7 +461,7 @@ void solve() {
                     registered[l].second = {i, j};  
                     for(int T3T = 0; T3T < data[month].size(); T3T++){
                         auto c = data[month][T3T];
-                        if(c.first == -1) continue;
+                        if(is_placed[c.second]) continue;
                         auto gg = make_linked_list(board);    
                         LowLink ll(gg);
                         ll.build();
@@ -481,8 +483,8 @@ void solve() {
                         }
                         if(option.h != -1){
                             board[option.h][option.w] = c.second;
+                            is_placed[c.second] = true;
                             registered.push_back({c.second, option});
-                            data[month][T3T] = {-1, -1};
                         }
                     }
                 }
