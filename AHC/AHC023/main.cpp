@@ -120,6 +120,7 @@ bool chmax(int &a, int b) { if (a < b) { a = b; return true; } return false; }
  *  - すまん，俺が全部悪かった だからよりを戻さないか...?(?)
  * 
  * - †過去に戻る†をしたほうが良いかもしれない
+ *  - 通路に隣接 + 収穫までの長さが優位に長い + placableである
  * 
 */
 int h = 20, w = 20;
@@ -217,7 +218,12 @@ class LowLink {
     * 計算の際に呼び出す。各連結成分ごとにDFSしている。.
     *
     */
-    void build() {
+    void build() {        // 既存の結果と状態をクリア
+        visited.assign(E.size(), 0);
+        order.assign(E.size(), 0);
+        low.assign(E.size(), 0);
+        articulation_point.clear();
+        bridge.clear();
         int count = 0;
         for (int i = 0; i < E.size(); i++) {
             if (!visited[i])
@@ -293,23 +299,30 @@ void update_depth(Pos start, vector<vector<int>>&bd){
     }
 }
 
-bool is_placable(Pos p, vector<int> &v, int proceed_day, vector<vector<int>> &bd){
-    if(bd[p.h][p.w] != -1 || depth[p.h][p.w] == INF || (p.h == enter && p.w ==  0)) return false;
+/**
+ * ある区画Pにおいて，以下を満たす場合作物を(１か月過去にさかのぼって)交換することができる
+ * 1. 通路と隣接している．言い換えると，区画PからBFSして入り口に到達できる
+ * 2. 作物の栽培期間が以前のものより長いこと
+ * 3. placableであること．
+*/
+bool is_swapable(Pos p, int crop, vector<vector<int>> bd){
+    return true; 
+}
 
+bool is_placable(Pos p, vector<int> &v, int proceed_day, vector<vector<int>> &bd){
+    if(depth[p.h][p.w] == INF || (p.h == enter && p.w ==  0)) return false;
+    if(bd[p.h][p.w] != -1) return false;
     rep(i, 4){
         if(!is_through(p, i)) continue;
         if(bd[p.h + dy[i]][p.w + dx[i]] == -1) continue;
         if(proceed_day > sd[bd[p.h + dy[i]][p.w + dx[i]]-1][1]) return false;
     }
 
-
     for(auto i: v) if(p.h * w + p.w == i) return false;
     return true;
 }
 
 bool is_reach_to_entrance(Pos start, vector<vector<int>> &bd){
-    // いい感じに枝狩りBFSして入り口にまで行けるかを試す
-    // 枝狩り -> 自分より深さが深いところは見に行かない
     if(bd[start.h][start.w] != -1) return false;
     queue<Pos> que;
     que.push(start);
@@ -324,10 +337,8 @@ bool is_reach_to_entrance(Pos start, vector<vector<int>> &bd){
             if(is_through(p, i)){
                 int nh = p.h + dy[i];
                 int nw = p.w + dx[i];
-                if(depth[p.h][p.w] >= depth[nh][nw]){
-                    is_visited[nh][nw] = true;
-                    que.push({nh, nw});
-                }
+                is_visited[nh][nw] = true;
+                que.push({nh, nw}); 
             }
         }
     }
@@ -460,7 +471,9 @@ void solve() {
             LowLink lowlink(g);
             lowlink.build();
 
-            if(is_placable({i, j}, lowlink.articulation_point, sd[registered[l].first - 1][1], board) && calcu_value(registered[l].first, registered[l].second, board) > calcu_value(registered[l].first, {i, j}, board)){
+            int lack = distribution(generator);
+            if(is_placable({i, j}, lowlink.articulation_point, sd[registered[l].first - 1][1], board) 
+                && calcu_value(registered[l].first, registered[l].second, board) > calcu_value(registered[l].first, {i, j}, board)){
                 // 仮置きする
                 board[i][j] = registered[l].first;
                 board[registered[l].second.h][registered[l].second.w] = -1;
