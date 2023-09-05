@@ -457,8 +457,8 @@ void solve() {
                 }
                 if(flag) {
                     registered[l].second = {i, j};  
-                    for(int _ = 0; _ < data[month].size(); _++){
-                        auto c = data[month][_];
+                    for(int T3T = 0; T3T < data[month].size(); T3T++){
+                        auto c = data[month][T3T];
                         if(c.first == -1) continue;
                         auto gg = make_linked_list(board);    
                         LowLink ll(gg);
@@ -482,7 +482,7 @@ void solve() {
                         if(option.h != -1){
                             board[option.h][option.w] = c.second;
                             registered.push_back({c.second, option});
-                            data[month][_] = {-1, -1};
+                            data[month][T3T] = {-1, -1};
                         }
                     }
                 }
