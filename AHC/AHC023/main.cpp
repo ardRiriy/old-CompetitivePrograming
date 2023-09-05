@@ -95,11 +95,28 @@ class LowLink {
     *
     */
     void build() {
+        // 既存の結果と状態をクリア
+        visited.assign(E.size(), 0);
+        order.assign(E.size(), 0);
+        low.assign(E.size(), 0);
+        articulation_point.clear();
+        bridge.clear();
+
         int count = 0;
         for (int i = 0; i < E.size(); i++) {
             if (!visited[i])
                 dfs(i, -1, count);
         }
+    }
+
+    void addEdge(int u, int v) {
+        E[u].push_back(v);
+        E[v].push_back(u);
+    }
+
+    void removeEdge(int u, int v) {
+        E[u].erase(remove(E[u].begin(), E[u].end(), v), E[u].end());
+        E[v].erase(remove(E[v].begin(), E[v].end(), u), E[v].end());
     }
 };
 
@@ -195,14 +212,34 @@ int calcu_value(int crop_num, Pos p, vector<vector<int>> bd){
     rep(i, 4){
         if(is_through(p, i)){
             int nh = p.h + dy[i], nw = p.w + dx[i];
-            if(bd[nh][nw] == -1) value += proceed_day * 2;
+            if(bd[nh][nw] == -1) value += proceed_day;
             else value += abs(sd[crop_num - 1][1] - sd[bd[nh][nw] - 1][1]);
         }
     }
     return value;
 }
 
+/*主に作物の取り除き時に利用*/
+void add_lowlink_edge(Pos p, LowLink &ll, vector<vector<int>> &bd){
+    rep(i, 4){
+        int nh = p.h + dy[i], nw = p.w + dx[i];
+        if(is_through(p, i) && bd[nh][nw] == -1){
+            ll.addEdge(p.h * w + p.w, nh * w + nw);
+        }
+    }
+    ll.build();
+}
 
+/*主に植付時に利用*/
+void remove_lowlink_edge(Pos p, LowLink &ll, vector<vector<int>> &bd){
+    rep(i, 4){
+        int nh = p.h + dy[i], nw = p.w + dx[i];
+        if(is_through(p, i) && bd[nh][nw] == -1){
+            ll.removeEdge(p.h * w + p.w, nh * w + nw);
+        }
+    }
+    ll.build();
+}
 void solve() {
     // hogehoge
     std::chrono::system_clock::time_point  start, end;
@@ -222,7 +259,6 @@ void solve() {
         rep(j, w-1) east_water_route[i][j] = s[j] - '0';
     }
 
-    
     int k;
     cin >> k;
     map<int, vector<pair<int, int>>> data;
@@ -235,18 +271,12 @@ void solve() {
     board.resize(h, vector<int>(w, -1));
     update_depth({enter, 0}, board);
 
-    int MOST_DEEP = 1; 
-    rep(i, h) rep(j, w) if(depth[i][j] != INF) chmax(MOST_DEEP, depth[i][j]);
-
-
-    rep(i, t)  sort(data[i+1].begin(), data[i+1].end());
-
+    rep(i, t) sort(data[i+1].begin(), data[i+1].end());
+    vector<Plan> ans;
 
     auto g = make_linked_list(board);    
     LowLink lowlink(g);
     lowlink.build();
-    
-    vector<Plan> ans;
 
     for(int month = 1; month <= t;month++){
         // 通常植付フェーズ
@@ -272,6 +302,7 @@ void solve() {
 
             if(option.h != -1){
                 board[option.h][option.w] = c.second;
+                remove_lowlink_edge(option, lowlink, board);
                 ans.push_back({board[option.h][option.w], option, month});
             }
         }
@@ -297,12 +328,14 @@ void solve() {
                     isChecked[new_h][new_w] = true;
                 }else if(sd[crop_num-1][1] <= month){
                     board[new_h][new_w] = -1;
+                    add_lowlink_edge({new_h, new_w}, lowlink, board);
                     que.push({new_h, new_w});
                     isChecked[new_h][new_w] = true;
                 }
             }
         }
     }
+
     print(ans.size());
     rep(i, ans.size()){
         print(ans[i].i<< " " << ans[i].p.h << " " << ans[i].p.w << " " <<ans[i].s);
