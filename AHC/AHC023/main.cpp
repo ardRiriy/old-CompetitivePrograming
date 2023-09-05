@@ -294,6 +294,33 @@ bool is_placable(Pos p, vector<int> &v, int proceed_day, vector<vector<int>> &bd
     return true;
 }
 
+bool is_reach_to_entrance(Pos start, vector<vector<int>> &bd){
+    // いい感じに枝狩りBFSして入り口にまで行けるかを試す
+    // 枝狩り -> 自分より深さが深いところは見に行かない
+    if(bd[start.h][start.w] != -1) return false;
+    queue<Pos> que;
+    que.push(start);
+    vector<vector<bool>> is_visited(h, vector<bool>(w, false));
+    is_visited[start.h][start.w] = true;
+    while(!que.empty()){
+        auto p = que.front();
+        if(p.h == enter && p.w == 0) return true;
+        que.pop();
+
+        rep(i, 4){
+            if(is_through(p, i)){
+                int nh = p.h + dy[i];
+                int nw = p.w + dx[i];
+                if(depth[p.h][p.w] >= depth[nh][nw]){
+                    is_visited[nh][nw] = true;
+                    que.push({nh, nw});
+                }
+            }
+        }
+    }
+    return false;
+}
+
 int manhattan_distance_from_wall(Pos p){
     return pow(enter - p.h, 2) + pow(p.w , 2);
 }
@@ -364,8 +391,26 @@ void solve() {
             lowlink.build();
 
             Pos option = {-1, -1};
-            int perf = 1e5;
-            rep(_, 5000){
+            int perf = 1e5;            
+            rep(i, h){
+                rep(j, w){
+                    if(is_placable({i, j}, lowlink.articulation_point, c.first, board)){
+                        int proceed_day = c.first - month;
+                        int t_v = calcu_value(c.second, {i, j});
+                        if(t_v >= 0 && t_v <= perf){
+                            if(manhattan_distance_from_wall({i, j}) < manhattan_distance_from_wall(option));
+                            option = {i, j};
+                            perf = t_v;
+                        }
+                    }         
+                }
+            }
+            if(option.h != -1){
+                board[option.h][option.w] = c.second;
+                ans.push_back({board[option.h][option.w], option, month});
+            }
+        }
+/*             rep(_, 5000){
                 int i = distribution(generator);
                 int j = distribution(generator);
                 if(is_placable({i, j}, lowlink.articulation_point, c.first, board)){
@@ -378,12 +423,7 @@ void solve() {
                         }
                     }
                 }
-            }
-            if(option.h != -1){
-                board[option.h][option.w] = c.second;
-                ans.push_back({board[option.h][option.w], option, month});
-            }
-        }
+            } */
 
         //収穫
         queue<Pos> que;
