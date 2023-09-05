@@ -108,6 +108,10 @@ bool chmax(int &a, int b) { if (a < b) { a = b; return true; } return false; }
  * - 何やってもバグらせる，才能かもしれん
  * 
  * - 思ったより実行時間に余裕があるので，BFSで入り口までの道まで行けるか判定するようにして焼き鈍しするのはありそう．あと評価関数をちゃんと作り直さないと...
+ * 
+ * - ~~~があいまいですのエラーでキレ散らかしてる(コンパイルが通るのでいいですけど...)
+ * 
+ * - えー，TLEはまぁ仕方ない実装をしているので仕方ないとして，WAは何？
 */
 int h = 20, w = 20;
 int t, enter;
@@ -415,7 +419,7 @@ void solve() {
                 registered.push_back({c.second, option});
             }
         }
-        rep(_, 1250){
+        rep(_, 1000){
             if(registered.size() == 0) break;
             // 空いてるスペースの座標候補 
             int i = distribution(generator);
