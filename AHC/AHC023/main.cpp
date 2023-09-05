@@ -6,7 +6,7 @@ using namespace std;
 #define print(x) cout << x << endl
 const int INF = LLONG_MAX;
 const int N_INF = LLONG_MIN;
-const int LMT = 2000; // ミリ秒指定
+const int LMT = 1800; // ミリ秒指定
 
 
 bool chmin(int &a, int b) { if (a > b) { a = b; return true; } return false; }
@@ -115,6 +115,7 @@ bool chmax(int &a, int b) { if (a < b) { a = b; return true; } return false; }
  * - ~~~があいまいですのエラーでキレ散らかしてる(コンパイルが通るのでいいですけど...)
  * 
  * - えー，TLEはまぁ仕方ない実装をしているので仕方ないとして，WAは何？
+ *  - すまん，俺が全部悪かった だからよりを戻さないか...?(?)
 */
 int h = 20, w = 20;
 int t, enter;
@@ -346,10 +347,22 @@ int calcu_value(int crop_num, Pos p, vector<vector<int>> bd){
     return value;
 }
 
+double customLog(double x) {
+    if (x == 0) {
+        return 0;
+    }
+    double term = M_PI * x / 200;
+    return 1500 * (sin(term) / term) + 1500 * (1 - sin(term) / term) + 300;
+}
+
+
 void solve() {
     // hogehoge
     std::chrono::system_clock::time_point  start, end;
     start = std::chrono::system_clock::now();
+    end = std::chrono::system_clock::now();
+    double elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(end-start).count();
+
     cin >> t >> h >> w >> enter;
 
     std::mt19937 generator;
@@ -393,12 +406,17 @@ void solve() {
     }
 
     vector<bool> is_placed(k+1, false);
+
+
+    double PER_TIME = LMT / t;
+
     for(int month = 1; month <= t;month++){
         // 通常植付フェーズ
         vector<pair<int, Pos>> registered; /* (作物番号, 置かれてる座標) */
         for(auto itr = data[month].rbegin(); itr != data[month].rend(); itr++){
             auto c = *itr;
             if(is_placed[c.second]) continue;
+
             auto g = make_linked_list(board);    
             LowLink lowlink(g);
             lowlink.build();
@@ -424,7 +442,8 @@ void solve() {
                 is_placed[c.second] = true;
             }
         }
-        rep(_, 1000){
+
+        do{
             if(registered.size() == 0) break;
             // 空いてるスペースの座標候補 
             int i = distribution(generator);
@@ -438,6 +457,7 @@ void solve() {
             auto g = make_linked_list(board);    
             LowLink lowlink(g);
             lowlink.build();
+
             if(is_placable({i, j}, lowlink.articulation_point, sd[registered[l].first - 1][1], board) && calcu_value(registered[l].first, registered[l].second, board) > calcu_value(registered[l].first, {i, j}, board)){
                 // 仮置きする
                 board[i][j] = registered[l].first;
@@ -463,7 +483,9 @@ void solve() {
                         auto c = data[month][T3T];
                         if(is_placed[c.second]) continue;
                         auto gg = make_linked_list(board);    
-                        LowLink ll(gg);
+
+                        auto g = make_linked_list(board);    
+                        LowLink ll(g);
                         ll.build();
 
                         Pos option = {-1, -1};
@@ -471,7 +493,6 @@ void solve() {
                         rep(ii, h){
                             rep(jj, w){
                                 if(is_placable({ii, jj}, ll.articulation_point, c.first, board)){
-                                    int proceed_day = c.first - month;
                                     int t_v = calcu_value(c.second, {ii, jj}, board);
                                     if(t_v >= 0 && t_v <= perf){
                                             if(manhattan_distance_from_wall({ii, jj}) < manhattan_distance_from_wall(option));
@@ -489,12 +510,14 @@ void solve() {
                     }
                 }
             }
-        }
+            end = std::chrono::system_clock::now();  // 計測終了時間
+            elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(end-start).count(); //処理に要した時間をミリ秒に変換
+        }while(elapsed < customLog(month));
 
         rep(i, registered.size()){
             ans.push_back({registered[i].first, registered[i].second, month});
         }
-
+        if(month == t) break;
         //収穫
         queue<Pos> que;
         que.push({enter, 0});
