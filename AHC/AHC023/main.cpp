@@ -80,6 +80,9 @@ bool chmax(int &a, int b) { if (a < b) { a = b; return true; } return false; }
  *  - ？＿？
  * 
  * - 先取しないほうが手元で高かった
+ * 
+ * - 登山したら点数上がりそうだけどWAでキレてる は？なんだお前
+ *  - 複数回プラントらしい ちょっと後で確認する
  * ----------------------------------------------------------
  * [わかったこと]
  * - 貪欲だけなら，先に盤面においておくのは悪手
@@ -453,38 +456,37 @@ void solve() {
                     }
                 }
                 if(flag) {
-                    registered[k].second = {i, j};  
-                    for(auto itr = data[month].rbegin(); itr != data[month].rend(); itr++){
-                        auto c = *itr;
-                        if(c.first == -1) continue;
-                        auto gg = make_linked_list(board);    
-                        LowLink ll(gg);
-                        ll.build();
+                registered[l].second = {i, j};  
+                for(int _ = 0; _ < data[month].size(); _++){
+                    auto c = data[month][_];
+                    if(c.first == -1) continue;
+                    auto gg = make_linked_list(board);    
+                    LowLink ll(gg);
+                    ll.build();
 
-                        Pos option = {-1, -1};
-                        int perf = 1e5;            
-                        rep(ii, h){
-                            rep(jj, w){
-                                if(is_placable({ii, jj}, ll.articulation_point, c.first, board)){
-                                    int proceed_day = c.first - month;
-                                    int t_v = calcu_value(c.second, {ii, jj}, board);
-                                    if(t_v >= 0 && t_v <= perf){
-                                        if(manhattan_distance_from_wall({ii, jj}) < manhattan_distance_from_wall(option));
-                                        option = {ii, jj};
-                                        perf = t_v;
-                                    }
-                                }         
-                            }
-                        }
-                        if(option.h != -1){
-                            board[option.h][option.w] = c.second;
-                            c.first = -1;
-                            registered.push_back({c.second, option});
+                    Pos option = {-1, -1};
+                    int perf = 1e5;            
+                    rep(ii, h){
+                        rep(jj, w){
+                            if(is_placable({ii, jj}, ll.articulation_point, c.first, board)){
+                                int proceed_day = c.first - month;
+                                int t_v = calcu_value(c.second, {ii, jj}, board);
+                                if(t_v >= 0 && t_v <= perf){
+                                    if(manhattan_distance_from_wall({ii, jj}) < manhattan_distance_from_wall(option));
+                                    option = {ii, jj};
+                                    perf = t_v;
+                                }
+                            }         
                         }
                     }
-                }
+                    if(option.h != -1){
+                        board[option.h][option.w] = c.second;
+                        registered.push_back({c.second, option});
+                        data[month][_] = {-1, -1};
+                    }
+                } 
             }
-        } 
+
         rep(i, registered.size()){
             ans.push_back({registered[i].first, registered[i].second, month});
         }
