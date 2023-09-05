@@ -64,6 +64,8 @@ bool chmax(int &a, int b) { if (a < b) { a = b; return true; } return false; }
  *   - 「似通った値を近くに置く」が強くない，というか全体的にいろんな数字が広がってるほうが強い，のか？
  *   - 実行回数ベースで，隣接4か所との差が小さくなるような場所を探して入れ替えるとか？
  *   - 空きスペースの処理に困りそうだけど，やってみる価値はある
+ * 
+ * - 前から見ていくよりは後ろから見て決めていったほうがよさそうかもしれない
  * -----------------------------------------------------
  * [改善中]
  * - isPlacable改善 -> ちょっと良くなった(14995525)
@@ -116,6 +118,9 @@ bool chmax(int &a, int b) { if (a < b) { a = b; return true; } return false; }
  * 
  * - えー，TLEはまぁ仕方ない実装をしているので仕方ないとして，WAは何？
  *  - すまん，俺が全部悪かった だからよりを戻さないか...?(?)
+ * 
+ * - †過去に戻る†をしたほうが良いかもしれない
+ * 
 */
 int h = 20, w = 20;
 int t, enter;
@@ -342,7 +347,7 @@ int calcu_value(int crop_num, Pos p, vector<vector<int>> bd){
             int nh = p.h + dy[i], nw = p.w + dx[i];
             if(bd[nh][nw] == -1) value += proceed_day;
             else value += abs(sd[crop_num - 1][1] - sd[bd[nh][nw] - 1][1]);
-        }
+        }   
     }
     return value;
 }
