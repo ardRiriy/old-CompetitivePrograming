@@ -340,7 +340,7 @@ int calcu_value(int crop_num, Pos p, vector<vector<int>> bd){
     rep(i, 4){
         if(is_through(p, i)){
             int nh = p.h + dy[i], nw = p.w + dx[i];
-            if(bd[nh][nw] == -1) value += proceed_day * 2;
+            if(bd[nh][nw] == -1) value += proceed_day;
             else value += abs(sd[crop_num - 1][1] - sd[bd[nh][nw] - 1][1]);
         }
     }
@@ -348,11 +348,8 @@ int calcu_value(int crop_num, Pos p, vector<vector<int>> bd){
 }
 
 double customLog(double x) {
-    if (x == 0) {
-        return 0;
-    }
-    double term = M_PI * x / 200;
-    return 1500 * (sin(term) / term) + 1500 * (1 - sin(term) / term) + 300;
+    double base = std::pow(100, 1.0 / 1500);
+    return std::log(x) / std::log(base);
 }
 
 
@@ -512,7 +509,7 @@ void solve() {
             }
             end = std::chrono::system_clock::now();  // 計測終了時間
             elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(end-start).count(); //処理に要した時間をミリ秒に変換
-        }while(elapsed < customLog(month));
+        }while(elapsed < customLog(month) + 300.0);
 
         rep(i, registered.size()){
             ans.push_back({registered[i].first, registered[i].second, month});
