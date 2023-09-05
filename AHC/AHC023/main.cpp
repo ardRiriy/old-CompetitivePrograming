@@ -157,7 +157,7 @@ vector<vector<int>> make_linked_list(vector<vector<int>> &bd){
 }
 
 
-void update_depth(Pos start, vector<vector<int>>&bd){
+void calc_depth(Pos start, vector<vector<int>>&bd){
     queue<pair<Pos, int>> que;
     fill(depth.begin(), depth.end(), vector<int>(w, INF));
     int now = 0;
@@ -192,10 +192,10 @@ bool is_placable(Pos p, vector<int> &v, int proceed_day, vector<vector<int>> &bd
 
     rep(i, 4){
         if(!is_through(p, i)) continue;
-        if(bd[p.h + dy[i]][p.w + dx[i]] == -1) continue;
-        if(proceed_day > sd[bd[p.h + dy[i]][p.w + dx[i]]-1][1]) return false;
+        int new_h = p.h + dy[i], new_w = p.w + dx[i];
+        if(bd[new_h][new_w] == -1) continue;
+        if(proceed_day > sd[bd[new_h][new_w]-1][1]) return false;
     }
-
 
     for(auto i: v) if(p.h * w + p.w == i) return false;
     return true;
@@ -269,7 +269,7 @@ void solve() {
     }
     
     board.resize(h, vector<int>(w, -1));
-    update_depth({enter, 0}, board);
+    calc_depth({enter, 0}, board);
 
     rep(i, t) sort(data[i+1].begin(), data[i+1].end());
     vector<Plan> ans;
