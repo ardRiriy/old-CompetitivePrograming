@@ -387,6 +387,7 @@ void solve() {
 
     for(int month = 1; month <= t;month++){
         // 通常植付フェーズ
+        vector<pair<int, Pos>> registered; /* (作物番号, 置かれてる座標) */
         for(auto itr = data[month].rbegin(); itr != data[month].rend(); itr++){
             auto c = *itr;
             auto g = make_linked_list(board);    
@@ -410,23 +411,79 @@ void solve() {
             }
             if(option.h != -1){
                 board[option.h][option.w] = c.second;
-                ans.push_back({board[option.h][option.w], option, month});
+                c.first = -1;
+                registered.push_back({c.second, option});
             }
         }
-/*             rep(_, 5000){
-                int i = distribution(generator);
-                int j = distribution(generator);
-                if(is_placable({i, j}, lowlink.articulation_point, c.first, board)){
-                    int t_v = calcu_value(c.second, {i, j});
-                    if(chmin(perf, t_v)){
-                        option = {i, j};
-                    }else if(perf == t_v){
-                        if(depth[i][j] < depth[option.h][option.w]){
-                        option = {i, j};
+        rep(_, 1250){
+            if(registered.size() == 0) break;
+            // 空いてるスペースの座標候補 
+            int i = distribution(generator);
+            int j = distribution(generator);
+            if(board[i][j] != -1) continue;
+
+            std::uniform_int_distribution<int> random(0, registered.size() - 1);
+            // 変更する作物
+            int l = random(generator);
+
+            auto g = make_linked_list(board);    
+            LowLink lowlink(g);
+            lowlink.build();
+            if(is_placable({i, j}, lowlink.articulation_point, sd[registered[l].first - 1][1], board) && calcu_value(registered[l].first, registered[l].second, board) > calcu_value(registered[l].first, {i, j}, board)){
+                // 仮置きする
+                board[i][j] = registered[l].first;
+                board[registered[l].second.h][registered[l].second.w] = -1;
+                bool flag = true;
+                rep(r, 4){
+                    Pos next = registered[l].second;
+                    next.h += dy[r];
+                    next.w += dx[r];
+                    if(is_through(next, r)){
+                        if(!is_reach_to_entrance(next, board)){
+                            // なかったことにする
+                            board[registered[l].second.h][registered[l].second.w] = registered[l].first;
+                            board[i][j] = -1;
+                            flag = false;
+                            break;
                         }
                     }
                 }
-            } */
+                if(flag) {
+                    registered[k].second = {i, j};  
+                    for(auto itr = data[month].rbegin(); itr != data[month].rend(); itr++){
+                        auto c = *itr;
+                        if(c.first == -1) continue;
+                        auto gg = make_linked_list(board);    
+                        LowLink ll(gg);
+                        ll.build();
+
+                        Pos option = {-1, -1};
+                        int perf = 1e5;            
+                        rep(ii, h){
+                            rep(jj, w){
+                                if(is_placable({ii, jj}, ll.articulation_point, c.first, board)){
+                                    int proceed_day = c.first - month;
+                                    int t_v = calcu_value(c.second, {ii, jj}, board);
+                                    if(t_v >= 0 && t_v <= perf){
+                                        if(manhattan_distance_from_wall({ii, jj}) < manhattan_distance_from_wall(option));
+                                        option = {ii, jj};
+                                        perf = t_v;
+                                    }
+                                }         
+                            }
+                        }
+                        if(option.h != -1){
+                            board[option.h][option.w] = c.second;
+                            c.first = -1;
+                            registered.push_back({c.second, option});
+                        }
+                    }
+                }
+            }
+        } 
+        rep(i, registered.size()){
+            ans.push_back({registered[i].first, registered[i].second, month});
+        }
 
         //収穫
         queue<Pos> que;
