@@ -208,7 +208,11 @@ int manhattan_distance_from_wall(Pos p){
 
 int calcu_value(int crop_num, Pos p, vector<vector<int>> bd){
     int proceed_day = sd[crop_num - 1][1] - sd[crop_num - 1][0];
-    int value = abs(depth[p.h][p.w] - proceed_day * 3 / 2);
+    int value = 0;
+
+    // 小さい数字は手前に入ってほしいという気持ちをこめている
+    if(proceed_day <= 10) value += pow(depth[p.h][p.w], 2);
+
     rep(i, 4){
         if(is_through(p, i)){
             int nh = p.h + dy[i], nw = p.w + dx[i];
@@ -299,7 +303,6 @@ void solve() {
                     }         
                 }
             }
-
             if(option.h != -1){
                 board[option.h][option.w] = c.second;
                 remove_lowlink_edge(option, lowlink, board);
