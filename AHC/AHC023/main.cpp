@@ -220,11 +220,14 @@ bool is_placable(Pos p, vector<int> &v, int proceed_day, vector<vector<int>> &bd
         if(bd[next.h][next.w] == -1) continue;
         if(proceed_day > sd[bd[next.h][next.w]-1][1]){
             bd[p.h][p.w] = 100;
+            calc_depth({enter, 0}, bd);
             if(!is_reachable_to_enter(next, board)) {
                 bd[p.h][p.w] = -1;
+                calc_depth({enter, 0}, bd);
                 return false;
             }
             bd[p.h][p.w] = -1;
+            calc_depth({enter, 0}, bd);
         }
     }
 
@@ -415,9 +418,10 @@ void solve() {
                                 if(is_placable({ii, jj}, lowlink.articulation_point, c.first, board)){
                                     int t_v = calcu_value(c.second, {ii, jj}, board);
                                     if(t_v >= 0 && t_v <= perf){
-                                            if(manhattan_distance_from_wall({ii, jj}) < manhattan_distance_from_wall(option));
-                                        option = {ii, jj};
-                                        perf = t_v;
+                                        if(manhattan_distance_from_wall({ii, jj}) < manhattan_distance_from_wall(option)){
+                                            option = {ii, jj};
+                                            perf = t_v;
+                                        }
                                     }
                                 }         
                             }
@@ -426,6 +430,7 @@ void solve() {
                             board[option.h][option.w] = c.second;
                             is_planted[c.second - 1] = true;
                             remove_lowlink_edge(option, lowlink, board);
+                            calc_depth({enter, 0}, board);
                             registered.push_back({c.second, option});
                         }
                     }
