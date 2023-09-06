@@ -141,6 +141,30 @@ bool is_through(Pos p, int r){
     return true;
 }
 
+bool is_reachable_to_enter(Pos p, vector<vector<int>> &bd){
+    queue<Pos> que;
+    que.push(p);
+
+    vector<vector<bool>> is_checked(h, vector<bool>(w, false));
+    is_checked[p.h][p.w] = true;
+    while(!que.empty()){
+        auto now = que.front();
+        que.pop();
+        if(now.h == enter && now.w == 0) return true;
+        rep(i, 4){
+            Pos next = p;
+            next.h += dy[i], next.w += dx[i];
+            if(is_through(next, i) && !is_checked[next.h][next.w] ){
+                if(bd[next.h][next.w] == -1){
+                    is_checked[next.h][next.w] = true;
+                    que.push(next);
+                }
+            }
+        }
+    }
+    return false;
+}
+
 vector<vector<int>> make_linked_list(vector<vector<int>> &bd){
     vector<vector<int>> res(h * w);
     rep(i,h){
@@ -192,9 +216,12 @@ bool is_placable(Pos p, vector<int> &v, int proceed_day, vector<vector<int>> &bd
 
     rep(i, 4){
         if(!is_through(p, i)) continue;
-        int new_h = p.h + dy[i], new_w = p.w + dx[i];
-        if(bd[new_h][new_w] == -1) continue;
-        if(proceed_day > sd[bd[new_h][new_w]-1][1]) return false;
+        Pos next = p;
+        next.h += dy[i], next.w += dx[i];
+        if(bd[next.h][next.w] == -1) continue;
+        if(proceed_day > sd[bd[next.h][next.w]-1][1]){
+            if(!is_reachable_to_enter(next, board)) return false;
+        }
     }
 
     for(auto i: v) if(p.h * w + p.w == i) return false;
