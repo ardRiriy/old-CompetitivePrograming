@@ -153,7 +153,7 @@ bool is_reachable_to_enter(Pos p, vector<vector<int>> &bd){
             Pos next;
             next.h = now.h + dy[i], next.w = now.w + dx[i];
             if(is_through(now, i) && !is_checked[next.h][next.w] ){
-                if(bd[next.h][next.w] == -1){
+                if(bd[next.h][next.w] == -1 && depth[next.h][next.w] <= depth[now.h][now.w]){
                     if(next.h == enter && next.w == 0) return true;
                     is_checked[next.h][next.w] = true;
                     que.push(next);
@@ -314,6 +314,7 @@ void solve() {
     lowlink.build();
 
     for(int month = 1; month <= t;month++){
+        calc_depth({enter, 0}, board);
         // 通常植付フェーズ
         for(auto itr = data[month].rbegin(); itr != data[month].rend(); itr++){
             auto c = *itr;
@@ -337,6 +338,7 @@ void solve() {
             if(option.h != -1){
                 board[option.h][option.w] = c.second;
                 remove_lowlink_edge(option, lowlink, board);
+                calc_depth({enter, 0}, board);
                 ans.push_back({board[option.h][option.w], option, month});
             }
         }
