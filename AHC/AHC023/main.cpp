@@ -236,30 +236,8 @@ int manhattan_distance_from_wall(Pos p){
     return pow(enter - p.h, 2) + pow(p.w , 2);
 }
 
-int evaluate_board(vector<vector<int>> &bd, int month){
-    int num_sum = 0; // 盤面上に存在する数値の和
-    int diff_sum = 0; // 盤面上の数字の差の和 空欄 -> 考えない
-    int blank_sum = 0;
-    rep(i, h){
-        rep(j, w){
-            if(bd[i][j] == -1) {
-                blank_sum++;
-            }else{
-                num_sum += sd[bd[i][j] - 1][1] - month;
-                rep(r, 4){
-                    if(is_through({i, j}, r)){
-                        if(bd[i + dy[r]][j + dx[r]] != -1){
-                            diff_sum += abs(sd[bd[i][j] - 1][1] - sd[bd[i + dy[r]][j + dx[r]] - 1][1]);
-                        }
-                    }
-                }
-            }
-        }
-    }
-    return (num_sum - diff_sum) * (400 - blank_sum);
-}
 
-int calcu_value(int crop_num, Pos p, vector<vector<int>>& bd){
+int calcu_value(int crop_num, Pos p, vector<vector<int>> bd){
     int proceed_day = sd[crop_num - 1][1] - sd[crop_num - 1][0];
     int value = 0;
 
@@ -280,7 +258,6 @@ int calcu_value(int crop_num, Pos p, vector<vector<int>>& bd){
     }
     return value;
 }
-
 
 /*主に作物の取り除き時に利用*/
 void add_lowlink_edge(Pos p, LowLink &ll, vector<vector<int>> &bd){
@@ -303,41 +280,6 @@ void remove_lowlink_edge(Pos p, LowLink &ll, vector<vector<int>> &bd){
     }
     ll.build();
 }
-
-int monte_carlo_simulation(vector<vector<int>> bd, vector<pair<int, int>> &post_plant, LowLink ll, vector<bool> &is_ck, int month){
-    int MAX_TURN = 5;
-    int turn = 0;
-    for(auto itr = post_plant.rbegin(); itr != post_plant.rend(); itr++){
-        if(turn > MAX_TURN) break;
-        else turn ++;
-        auto c = *itr;
-        if(is_ck[c.second - 1]) continue;
-
-        Pos option = {-1, -1};
-        int perf = 1e5;
-        rep(i, h){
-            rep(j, w){
-                if(is_placable({i, j}, ll.articulation_point, c.first, bd)){
-                    int t_v = calcu_value(c.second, {i, j}, bd);
-                    if(chmin(perf, t_v)){
-                        option = {i, j};
-                    }else if(perf == t_v){
-                        if(depth[i][j] < depth[option.h][option.w]){
-                            option = {i, j};
-                        }
-                    }
-                }         
-            }
-        }
-        if(option.h != -1){
-            bd[option.h][option.w] = c.second;
-            remove_lowlink_edge(option, ll, bd);
-            calc_depth({enter, 0}, bd);
-        }
-    }
-    return evaluate_board(bd, month);
-}
-
 void solve() {
     // hogehoge
     std::chrono::system_clock::time_point  start, end;
@@ -371,7 +313,6 @@ void solve() {
 
     rep(i, t) sort(data[i+1].begin(), data[i+1].end());
     vector<Plan> ans;
-    vector<bool> is_planted(k, false);
 
     auto g = make_linked_list(board);    
     LowLink lowlink(g);
@@ -382,34 +323,28 @@ void solve() {
         // 通常植付フェーズ
         for(auto itr = data[month].rbegin(); itr != data[month].rend(); itr++){
             auto c = *itr;
-            is_planted[c.second - 1] = true;
 
-            vector<pair<int, Pos>> rank;
-
+            Pos option = {-1, -1};
+            int perf = 1e5;
             rep(i, h){
                 rep(j, w){
                     if(is_placable({i, j}, lowlink.articulation_point, c.first, board)){
-                        rank.push_back({calcu_value(c.second, {i, j}, board), {i, j}});
+                        int t_v = calcu_value(c.second, {i, j}, board);
+                        if(chmin(perf, t_v)){
+                            option = {i, j};
+                        }else if(perf == t_v){
+                            if(depth[i][j] < depth[option.h][option.w]){
+                                option = {i, j};
+                            }
+                        }
                     }         
                 }
             }
-
-            sort(rank.begin(), rank.end(), [](auto &a, auto &b){
-                return a.first < b.first;
-            });
-
-            if(!rank.empty()){
-                int idx = -1;
-                int perf = N_INF;
-                rep(k, min(2LL, (int)rank.size())){
-                    if(chmax(perf, monte_carlo_simulation(board, data[month], lowlink, is_planted, month))){
-                        idx = k;
-                    }
-                }
-                board[rank[idx].second.h][rank[idx].second.w] = c.second;
-                remove_lowlink_edge(rank[idx].second, lowlink, board);
+            if(option.h != -1){
+                board[option.h][option.w] = c.second;
+                remove_lowlink_edge(option, lowlink, board);
                 calc_depth({enter, 0}, board);
-                ans.push_back({board[rank[idx].second.h][rank[idx].second.w], rank[idx].second, month});
+                ans.push_back({board[option.h][option.w], option, month});
             }
         }
 
