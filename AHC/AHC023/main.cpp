@@ -6,7 +6,7 @@ using namespace std;
 #define print(x) cout << x << endl
 const int INF = LLONG_MAX;
 const int N_INF = LLONG_MIN;
-const int LMT = 1800; // ミリ秒指定
+const int LMT = 2000; // ミリ秒指定
 
 
 bool chmin(int &a, int b) { if (a > b) { a = b; return true; } return false; }
@@ -285,17 +285,14 @@ void remove_lowlink_edge(Pos p, LowLink &ll, vector<vector<int>> &bd){
 }
 
 double customLog(double x) {
-    double base = std::pow(100, 1.0 / 1500);
-    return std::log(x) / std::log(base);
+    return 17 * x + 100;
 }
 
 
 void solve() {
     // hogehoge
-    std::chrono::system_clock::time_point  start, end;
-    start = std::chrono::system_clock::now();
-    end = std::chrono::system_clock::now();
-    double elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(end-start).count();
+    auto start = std::chrono::high_resolution_clock::now();
+
 
     cin >> t >> h >> w >> enter;
 
@@ -372,9 +369,11 @@ void solve() {
 
         while(true){ 
             if(registered.size() == 0) break;
-            end = std::chrono::system_clock::now();  // 計測終了時間
-            elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(end-start).count(); //処理に要した時間をミリ秒に変換
-            if(elapsed >= customLog(month) + 300.0) break;
+            auto end = std::chrono::high_resolution_clock::now();
+            double duration = std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
+            duration /= 1000.0;
+            if(duration > customLog(month)) break;
+
             int random_h = distribution(generator);
             int random_w = distribution(generator);
             if(board[random_h][random_w] != -1) continue;
@@ -396,7 +395,7 @@ void solve() {
                     next.h += dy[r];
                     next.w += dx[r];
                     if(is_through(next, r)){
-                        if(depth[next.h][next.w] != INF){
+                        if(depth[next.h][next.w] == INF){
                             // なかったことにする
                             board[registered[change_crop].second.h][registered[change_crop].second.w] = registered[change_crop].first;
                             board[random_h][random_w] = -1;
@@ -410,10 +409,8 @@ void solve() {
                     registered[change_crop].second = random_choose;
                     add_lowlink_edge(registered[change_crop].second, lowlink, board);
                     remove_lowlink_edge(random_choose, lowlink, board);
+
                     rep(new_i, data[month].size()){
-                        end = std::chrono::system_clock::now();  // 計測終了時間
-                        elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(end-start).count(); //処理に要した時間をミリ秒に変換
-                        if(elapsed >= customLog(month) + 300.0) break;
                         auto c = data[month][new_i];
                         if(is_planted[c.second - 1]) continue;
 
@@ -432,6 +429,7 @@ void solve() {
                                 }         
                             }
                         }
+
                         if(option.h != -1){
                             board[option.h][option.w] = c.second;
                             is_planted[c.second - 1] = true;
