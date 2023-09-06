@@ -377,6 +377,7 @@ void solve() {
             if(elapsed >= customLog(month) + 300.0) break;
             int random_h = distribution(generator);
             int random_w = distribution(generator);
+            if(board[random_h][random_w] != -1) continue;
             Pos random_choose = {random_h, random_w};
 
             std::uniform_int_distribution<int> random(0, registered.size() - 1);
@@ -404,10 +405,15 @@ void solve() {
                             break;
                         }
                     }
-                }                   
+                }
                 if(flag){
                     registered[change_crop].second = random_choose;
+                    add_lowlink_edge(registered[change_crop].second, lowlink, board);
+                    remove_lowlink_edge(random_choose, lowlink, board);
                     rep(new_i, data[month].size()){
+                        end = std::chrono::system_clock::now();  // 計測終了時間
+                        elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(end-start).count(); //処理に要した時間をミリ秒に変換
+                        if(elapsed >= customLog(month) + 300.0) break;
                         auto c = data[month][new_i];
                         if(is_planted[c.second - 1]) continue;
 
