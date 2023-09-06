@@ -247,8 +247,13 @@ int calcu_value(int crop_num, Pos p, vector<vector<int>> bd){
     rep(i, 4){
         if(is_through(p, i)){
             int nh = p.h + dy[i], nw = p.w + dx[i];
-            if(bd[nh][nw] == -1) value += proceed_day;
-            else value += abs(sd[crop_num - 1][1] - sd[bd[nh][nw] - 1][1]);
+            if(bd[nh][nw] == -1) {
+                if(proceed_day > 7){
+                    value += proceed_day;
+                }else{
+                value += depth[p.h][p.w];
+                }
+            } else value += abs(sd[crop_num - 1][1] - sd[bd[nh][nw] - 1][1]);
         }
     }
     return value;
