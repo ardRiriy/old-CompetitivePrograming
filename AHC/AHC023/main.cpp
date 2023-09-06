@@ -236,8 +236,30 @@ int manhattan_distance_from_wall(Pos p){
     return pow(enter - p.h, 2) + pow(p.w , 2);
 }
 
+int evaluate_board(vector<vector<int>> &bd, int month){
+    int num_sum = 0; // 盤面上に存在する数値の和
+    int diff_sum = 0; // 盤面上の数字の差の和 空欄 -> 考えない
+    int blank_sum = 0;
+    rep(i, h){
+        rep(j, w){
+            if(bd[i][j] == -1) {
+                blank_sum++;
+            }else{
+                num_sum += sd[bd[i][j] - 1][1] - month;
+                rep(r, 4){
+                    if(is_through({i, j}, r)){
+                        if(bd[i + dy[r]][j + dx[r]] != -1){
+                            diff_sum += abs(sd[bd[i][j]][1] - sd[bd[i + dy[r]][j + dx[r]]][1]);
+                        }
+                    }
+                }
+            }
+        }
+    }
+    return (num_sum - diff_sum) * (400 - blank_sum);
+}
 
-int calcu_value(int crop_num, Pos p, vector<vector<int>> bd){
+int calcu_value(int crop_num, Pos p, vector<vector<int>>& bd){
     int proceed_day = sd[crop_num - 1][1] - sd[crop_num - 1][0];
     int value = 0;
 
@@ -324,27 +346,25 @@ void solve() {
         for(auto itr = data[month].rbegin(); itr != data[month].rend(); itr++){
             auto c = *itr;
 
-            Pos option = {-1, -1};
-            int perf = 1e5;
+            vector<pair<int, Pos>> rank;
+
             rep(i, h){
                 rep(j, w){
                     if(is_placable({i, j}, lowlink.articulation_point, c.first, board)){
-                        int t_v = calcu_value(c.second, {i, j}, board);
-                        if(chmin(perf, t_v)){
-                            option = {i, j};
-                        }else if(perf == t_v){
-                            if(depth[i][j] < depth[option.h][option.w]){
-                                option = {i, j};
-                            }
-                        }
+                        rank.push_back({calcu_value(c.second, {i, j}, board), {i, j}});
                     }         
                 }
             }
-            if(option.h != -1){
-                board[option.h][option.w] = c.second;
-                remove_lowlink_edge(option, lowlink, board);
+
+            sort(rank.begin(), rank.end(), [](auto &a, auto &b){
+                return a.first < b.first;
+            });
+
+            if(!rank.empty()){
+                board[rank[0].second.h][rank[0].second.w] = c.second;
+                remove_lowlink_edge(rank[0].second, lowlink, board);
                 calc_depth({enter, 0}, board);
-                ans.push_back({board[option.h][option.w], option, month});
+                ans.push_back({board[rank[0].second.h][rank[0].second.w], rank[0].second, month});
             }
         }
 
