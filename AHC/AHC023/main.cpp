@@ -6,7 +6,7 @@ using namespace std;
 #define print(x) cout << x << endl
 const int INF = LLONG_MAX;
 const int N_INF = LLONG_MIN;
-const int LMT = 2000; // ミリ秒指定
+const int LMT = 1800; // ミリ秒指定
 
 
 bool chmin(int &a, int b) { if (a > b) { a = b; return true; } return false; }
@@ -280,13 +280,27 @@ void remove_lowlink_edge(Pos p, LowLink &ll, vector<vector<int>> &bd){
     }
     ll.build();
 }
+
+double customLog(double x) {
+    double base = std::pow(100, 1.0 / 1500);
+    return std::log(x) / std::log(base);
+}
+
+
 void solve() {
     // hogehoge
     std::chrono::system_clock::time_point  start, end;
     start = std::chrono::system_clock::now();
+    end = std::chrono::system_clock::now();
+    double elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(end-start).count();
+
     cin >> t >> h >> w >> enter;
 
     vector<vector<bool>> isChecked(h, vector<bool>(w, false));
+
+    std::mt19937 generator;
+    generator.seed(std::random_device()());
+    std::uniform_int_distribution<int> distribution(0, h-1);
 
     rep(i, h-1){
         string s;
@@ -318,8 +332,12 @@ void solve() {
     LowLink lowlink(g);
     lowlink.build();
 
+    vector<bool> is_planted(k, false);
+
     for(int month = 1; month <= t;month++){
         calc_depth({enter, 0}, board);
+        vector<pair<int, Pos>> registered; /* (作物番号, 置かれてる座標) */
+
         // 通常植付フェーズ
         for(auto itr = data[month].rbegin(); itr != data[month].rend(); itr++){
             auto c = *itr;
@@ -344,10 +362,79 @@ void solve() {
                 board[option.h][option.w] = c.second;
                 remove_lowlink_edge(option, lowlink, board);
                 calc_depth({enter, 0}, board);
-                ans.push_back({board[option.h][option.w], option, month});
+                registered.push_back({c.second, option});
+                is_planted[c.second - 1] = true;
             }
         }
 
+        while(true){ 
+            if(registered.size() == 0) break;
+            end = std::chrono::system_clock::now();  // 計測終了時間
+            elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(end-start).count(); //処理に要した時間をミリ秒に変換
+            if(elapsed >= customLog(month) + 300.0) break;
+            int random_h = distribution(generator);
+            int random_w = distribution(generator);
+            Pos random_choose = {random_h, random_w};
+
+            std::uniform_int_distribution<int> random(0, registered.size() - 1);
+            // 変更する作物
+            int change_crop = random(generator);
+            if(is_placable(random_choose, lowlink.articulation_point, sd[registered[change_crop].first - 1][1], board) 
+                && calcu_value(registered[change_crop].first, registered[change_crop].second, board) > calcu_value(registered[change_crop].first, random_choose, board)){
+                    // 仮置きする
+                board[registered[change_crop].second.h][registered[change_crop].second.w] = -1;
+                board[random_h][random_w] = registered[change_crop].first;
+                calc_depth({enter, 0}, board);
+                bool flag = true;
+
+                rep(r, 4){
+                    Pos next = registered[change_crop].second;
+                    next.h += dy[r];
+                    next.w += dx[r];
+                    if(is_through(next, r)){
+                        if(depth[next.h][next.w] != INF){
+                            // なかったことにする
+                            board[registered[change_crop].second.h][registered[change_crop].second.w] = registered[change_crop].first;
+                            board[random_h][random_w] = -1;
+                            flag = false;
+                            calc_depth({enter, 0}, board);
+                            break;
+                        }
+                    }
+                }                   
+                if(flag){
+                    registered[change_crop].second = random_choose;
+                    rep(new_i, data[month].size()){
+                        auto c = data[month][new_i];
+                        if(is_planted[c.second - 1]) continue;
+
+                        Pos option = {-1, -1};
+                        int perf = 1e5;            
+                        rep(ii, h){
+                            rep(jj, w){
+                                if(is_placable({ii, jj}, lowlink.articulation_point, c.first, board)){
+                                    int t_v = calcu_value(c.second, {ii, jj}, board);
+                                    if(t_v >= 0 && t_v <= perf){
+                                            if(manhattan_distance_from_wall({ii, jj}) < manhattan_distance_from_wall(option));
+                                        option = {ii, jj};
+                                        perf = t_v;
+                                    }
+                                }         
+                            }
+                        }
+                        if(option.h != -1){
+                            board[option.h][option.w] = c.second;
+                            is_planted[c.second - 1] = true;
+                            remove_lowlink_edge(option, lowlink, board);
+                            registered.push_back({c.second, option});
+                        }
+                    }
+                }
+            }
+        }
+        rep(i, registered.size()){
+            ans.push_back({registered[i].first, registered[i].second, month});
+        }
         //収穫
         queue<Pos> que;
         que.push({enter, 0});
