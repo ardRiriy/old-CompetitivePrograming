@@ -407,8 +407,8 @@ void solve() {
                 }
                 if(flag){
                     registered[change_crop].second = random_choose;
-                    add_lowlink_edge(registered[change_crop].second, lowlink, board);
                     remove_lowlink_edge(random_choose, lowlink, board);
+                    add_lowlink_edge(registered[change_crop].second, lowlink, board);
 
                     rep(new_i, data[month].size()){
                         auto c = data[month][new_i];
