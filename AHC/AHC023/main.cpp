@@ -285,7 +285,7 @@ void remove_lowlink_edge(Pos p, LowLink &ll, vector<vector<int>> &bd){
 }
 
 double customLog(double x) {
-    return 17 * x + 100;
+    return 1.582 * x * x + 2.0 * x + 178.4;
 }
 
 
@@ -344,18 +344,35 @@ void solve() {
 
             Pos option = {-1, -1};
             int perf = 1e5;
-            rep(i, h){
-                rep(j, w){
-                    if(is_placable({i, j}, lowlink.articulation_point, c.first, board)){
-                        int t_v = calcu_value(c.second, {i, j}, board);
-                        if(chmin(perf, t_v)){
-                            option = {i, j};
-                        }else if(perf == t_v){
-                            if(depth[i][j] < depth[option.h][option.w]){
-                                option = {i, j};
-                            }
+
+            queue<Pos> que;
+            que.push({enter, 0});
+            fill(isChecked.begin(), isChecked.end(), vector<bool>(w, false));
+            while(!que.empty()){
+                auto p = que.front();
+                que.pop();
+                if(is_placable({p.h, p.w}, lowlink.articulation_point, c.first, board)){
+                    int t_v = calcu_value(c.second, {p.h, p.w}, board);
+                    if(chmin(perf, t_v)){
+                        option = {p.h, p.w};
+                    }else if(perf == t_v){
+                        if(depth[p.h][p.w] > depth[option.h][option.w]){
+                            option = {p.h, p.w};
                         }
-                    }         
+                    }
+                }         
+                rep(i, 4){
+                    if(!is_through(p, i)) continue;
+
+                    int new_h = p.h + dy[i];
+                    int new_w = p.w + dx[i];
+                    if(isChecked[new_h][new_w]) continue;
+                    // boardのチェック
+                    int crop_num = board[new_h][new_w];
+                    if (crop_num == -1) {
+                        que.push({new_h, new_w});
+                        isChecked[new_h][new_w] = true;
+                    }
                 }
             }
             if(option.h != -1){
@@ -367,83 +384,11 @@ void solve() {
             }
         }
 
-        while(true){ 
-            if(registered.size() == 0) break;
-            auto end = std::chrono::high_resolution_clock::now();
-            double duration = std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
-            duration /= 1000.0;
-            if(duration > customLog(month)) break;
-
-            int random_h = distribution(generator);
-            int random_w = distribution(generator);
-            if(board[random_h][random_w] != -1) continue;
-            Pos random_choose = {random_h, random_w};
-
-            std::uniform_int_distribution<int> random(0, registered.size() - 1);
-            // 変更する作物
-            int change_crop = random(generator);
-            if(is_placable(random_choose, lowlink.articulation_point, sd[registered[change_crop].first - 1][1], board) 
-                && calcu_value(registered[change_crop].first, registered[change_crop].second, board) > calcu_value(registered[change_crop].first, random_choose, board)){
-                    // 仮置きする
-                board[registered[change_crop].second.h][registered[change_crop].second.w] = -1;
-                board[random_h][random_w] = registered[change_crop].first;
-                calc_depth({enter, 0}, board);
-                bool flag = true;
-
-                rep(r, 4){
-                    Pos next = registered[change_crop].second;
-                    next.h += dy[r];
-                    next.w += dx[r];
-                    if(is_through(next, r)){
-                        if(depth[next.h][next.w] == INF){
-                            // なかったことにする
-                            board[registered[change_crop].second.h][registered[change_crop].second.w] = registered[change_crop].first;
-                            board[random_h][random_w] = -1;
-                            flag = false;
-                            calc_depth({enter, 0}, board);
-                            break;
-                        }
-                    }
-                }
-                if(flag){
-                    registered[change_crop].second = random_choose;
-                    remove_lowlink_edge(random_choose, lowlink, board);
-                    add_lowlink_edge(registered[change_crop].second, lowlink, board);
-
-                    rep(new_i, data[month].size()){
-                        auto c = data[month][new_i];
-                        if(is_planted[c.second - 1]) continue;
-
-                        Pos option = {-1, -1};
-                        int perf = 1e5;            
-                        rep(ii, h){
-                            rep(jj, w){
-                                if(is_placable({ii, jj}, lowlink.articulation_point, c.first, board)){
-                                    int t_v = calcu_value(c.second, {ii, jj}, board);
-                                    if(t_v >= 0 && t_v <= perf){
-                                        if(manhattan_distance_from_wall({ii, jj}) < manhattan_distance_from_wall(option)){
-                                            option = {ii, jj};
-                                            perf = t_v;
-                                        }
-                                    }
-                                }         
-                            }
-                        }
-
-                        if(option.h != -1){
-                            board[option.h][option.w] = c.second;
-                            is_planted[c.second - 1] = true;
-                            remove_lowlink_edge(option, lowlink, board);
-                            calc_depth({enter, 0}, board);
-                            registered.push_back({c.second, option});
-                        }
-                    }
-                }
-            }
-        }
+        
         rep(i, registered.size()){
             ans.push_back({registered[i].first, registered[i].second, month});
         }
+
         //収穫
         queue<Pos> que;
         que.push({enter, 0});
