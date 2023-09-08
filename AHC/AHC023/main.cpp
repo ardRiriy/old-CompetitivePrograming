@@ -141,28 +141,7 @@ bool is_through(Pos p, int r){
     return true;
 }
 
-bool is_reachable_to_enter(Pos p, vector<vector<int>> &bd){
-    queue<Pos> que;
-    que.push(p);
-    vector<vector<bool>> is_checked(h, vector<bool>(w, false));
-    is_checked[p.h][p.w] = true;
-    while(!que.empty()){
-        auto now = que.front();
-        que.pop();
-        rep(i, 4){
-            Pos next;
-            next.h = now.h + dy[i], next.w = now.w + dx[i];
-            if(is_through(now, i) && !is_checked[next.h][next.w] ){
-                if(bd[next.h][next.w] == -1 && depth[next.h][next.w] <= depth[now.h][now.w]){
-                    if(next.h == enter && next.w == 0) return true;
-                    is_checked[next.h][next.w] = true;
-                    que.push(next);
-                }
-            }
-        }
-    }
-    return false;
-}
+
 
 vector<vector<int>> make_linked_list(vector<vector<int>> &bd){
     vector<vector<int>> res(h * w);
@@ -183,7 +162,7 @@ vector<vector<int>> make_linked_list(vector<vector<int>> &bd){
 void calc_depth(Pos start, vector<vector<int>>&bd){
     queue<pair<Pos, int>> que;
     fill(depth.begin(), depth.end(), vector<int>(w, INF));
-    int now = 0;
+    int now = 1;
     depth[start.h][start.w] = now;
     que.push({start, now});
 
@@ -213,6 +192,7 @@ void calc_depth(Pos start, vector<vector<int>>&bd){
 bool is_placable(Pos p, vector<int> &v, int proceed_day, vector<vector<int>> &bd){
     if(bd[p.h][p.w] != -1 || depth[p.h][p.w] == INF || (p.h == enter && p.w ==  0)) return false;
 
+    vector<vector<int>> tmp = depth;
     rep(i, 4){
         if(!is_through(p, i)) continue;
         Pos next;
@@ -221,15 +201,25 @@ bool is_placable(Pos p, vector<int> &v, int proceed_day, vector<vector<int>> &bd
         if(proceed_day > sd[bd[next.h][next.w]-1][1]){
             bd[p.h][p.w] = 100;
             calc_depth({enter, 0}, bd);
-            if(!is_reachable_to_enter(next, board)) {
+            bool flag = false;
+            rep(r, 4){
+                if(!is_through(next, r)) continue;
+                Pos nn = next;
+                nn.h += dy[r];
+                nn.w += dx[r];
+                if(bd[nn.h][nn.w] == -1) flag = true;                
+            }
+            if(!flag) {
                 bd[p.h][p.w] = -1;
-                calc_depth({enter, 0}, bd);
+                depth.clear();
+                depth = tmp;
                 return false;
             }
-            bd[p.h][p.w] = -1;
-            calc_depth({enter, 0}, bd);
         }
     }
+    bd[p.h][p.w] = -1;
+    depth.clear();
+    depth = tmp;
 
     for(auto i: v) if(p.h * w + p.w == i) return false;
     return true;
@@ -245,7 +235,7 @@ int calcu_value(int crop_num, Pos p, vector<vector<int>> bd){
     int value = 0;
 
     // 小さい数字は手前に入ってほしいという気持ちをこめている
-    if(proceed_day <= 7) value += pow(depth[p.h][p.w], 2);
+    // if(proceed_day <= 7) value += pow(depth[p.h][p.w], 2);
 
     rep(i, 4){
         if(is_through(p, i)){
@@ -284,23 +274,19 @@ void remove_lowlink_edge(Pos p, LowLink &ll, vector<vector<int>> &bd){
     ll.build();
 }
 
-double customLog(double x) {
-    return 1.582 * x * x + 2.0 * x + 178.4;
-}
-
 
 void solve() {
     // hogehoge
-    auto start = std::chrono::high_resolution_clock::now();
+    // auto start = std::chrono::high_resolution_clock::now();
 
 
     cin >> t >> h >> w >> enter;
 
     vector<vector<bool>> isChecked(h, vector<bool>(w, false));
 
-    std::mt19937 generator;
+/*     std::mt19937 generator;
     generator.seed(std::random_device()());
-    std::uniform_int_distribution<int> distribution(0, h-1);
+    std::uniform_int_distribution<int> distribution(0, h-1); */
 
     rep(i, h-1){
         string s;
@@ -336,7 +322,6 @@ void solve() {
 
     for(int month = 1; month <= t;month++){
         calc_depth({enter, 0}, board);
-        vector<pair<int, Pos>> registered; /* (作物番号, 置かれてる座標) */
 
         // 通常植付フェーズ
         for(auto itr = data[month].rbegin(); itr != data[month].rend(); itr++){
@@ -348,6 +333,7 @@ void solve() {
             queue<Pos> que;
             que.push({enter, 0});
             fill(isChecked.begin(), isChecked.end(), vector<bool>(w, false));
+            isChecked[enter][0] = true;
             while(!que.empty()){
                 auto p = que.front();
                 que.pop();
@@ -379,14 +365,9 @@ void solve() {
                 board[option.h][option.w] = c.second;
                 remove_lowlink_edge(option, lowlink, board);
                 calc_depth({enter, 0}, board);
-                registered.push_back({c.second, option});
+                ans.push_back({c.second, option, month});
                 is_planted[c.second - 1] = true;
             }
-        }
-
-        
-        rep(i, registered.size()){
-            ans.push_back({registered[i].first, registered[i].second, month});
         }
 
         //収穫
