@@ -268,7 +268,7 @@ int calc_board_value(vector<vector<int>> &bd){
     rep(i, h){
         rep(j, w){
             if(bd[i][j] == -1) {
-                sum += 50;
+                sum += 100;
                 continue;
             }
             rep(r, 4){
@@ -289,7 +289,7 @@ int  monte_carlo_simulation(vector<vector<int>> &bd, vector<pair<int, int>> &dat
 
     // ↑ は？死ねやカス
     
-    int TURN = 15;
+    int TURN = 10;
     vector<Pos> changed; // 変更された座標を持つ 最終的に全部-1に戻す
     for(int idx = data.size() - 1; idx >= 0 && TURN >= 0; idx--){
         TURN--;
@@ -388,7 +388,7 @@ void solve() {
                 return a.first < b.first;
             });
 
-            if(candidate.size() == 1){
+            if(candidate.size() == 1 ||(month >= 40 && candidate.size() > 0)){
                 board[candidate[0].second.h][candidate[0].second.w] = c.second;
                 remove_lowlink_edge(candidate[0].second, lowlink, board, true);
                 ans.push_back({c.second, candidate[0].second, month});
@@ -404,7 +404,7 @@ void solve() {
 
             int index = 0;
             int v = INF;
-            rep(i, min(2LL, (int)candidate.size())){
+            rep(i, min(3LL, (int)candidate.size())){
                 board[candidate[i].second.h][candidate[i].second.w] = c.second;
                 if(chmin(v, monte_carlo_simulation(board, data[month], lowlink))){
                     index = i;
