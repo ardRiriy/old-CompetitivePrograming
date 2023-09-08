@@ -192,7 +192,6 @@ void calc_depth(Pos start, vector<vector<int>>&bd){
 bool is_placable(Pos p, vector<int> &v, int proceed_day, vector<vector<int>> &bd){
     if(bd[p.h][p.w] != -1 || depth[p.h][p.w] == INF || (p.h == enter && p.w ==  0)) return false;
 
-    vector<vector<int>> tmp = depth;
     rep(i, 4){
         if(!is_through(p, i)) continue;
         Pos next;
@@ -200,7 +199,6 @@ bool is_placable(Pos p, vector<int> &v, int proceed_day, vector<vector<int>> &bd
         if(bd[next.h][next.w] == -1) continue;
         if(proceed_day > sd[bd[next.h][next.w]-1][1]){
             bd[p.h][p.w] = 100;
-            // calc_depth({enter, 0}, bd);
             bool flag = false;
             rep(r, 4){
                 if(!is_through(next, r)) continue;
@@ -211,15 +209,11 @@ bool is_placable(Pos p, vector<int> &v, int proceed_day, vector<vector<int>> &bd
             }
             if(!flag) {
                 bd[p.h][p.w] = -1;
-                depth.clear();
-                depth = tmp;
                 return false;
             }
         }
     }
     bd[p.h][p.w] = -1;
-    depth.clear();
-    depth = tmp;
 
     for(auto i: v) if(p.h * w + p.w == i) return false;
     return true;
@@ -253,31 +247,31 @@ int calcu_value(int crop_num, Pos p, vector<vector<int>> bd){
 }
 
 /*主に作物の取り除き時に利用*/
-void add_lowlink_edge(Pos p, LowLink &ll, vector<vector<int>> &bd){
+void add_lowlink_edge(Pos p, LowLink &ll, vector<vector<int>> &bd, bool isUpdate){
     rep(i, 4){
         int nh = p.h + dy[i], nw = p.w + dx[i];
         if(is_through(p, i) && bd[nh][nw] == -1){
             ll.addEdge(p.h * w + p.w, nh * w + nw);
         }
     }
-    ll.build();
+    if(isUpdate)ll.build();
 }
 
 /*主に植付時に利用*/
-void remove_lowlink_edge(Pos p, LowLink &ll, vector<vector<int>> &bd){
+void remove_lowlink_edge(Pos p, LowLink &ll, vector<vector<int>> &bd, bool isUpdate){
     rep(i, 4){
         int nh = p.h + dy[i], nw = p.w + dx[i];
         if(is_through(p, i) && bd[nh][nw] == -1){
             ll.removeEdge(p.h * w + p.w, nh * w + nw);
         }
     }
-    ll.build();
+    if(isUpdate)ll.build();
 }
 
 
 void solve() {
     // hogehoge
-    // auto start = std::chrono::high_resolution_clock::now();
+    auto start = std::chrono::high_resolution_clock::now();
 
 
     cin >> t >> h >> w >> enter;
@@ -321,8 +315,6 @@ void solve() {
     vector<bool> is_planted(k, false);
 
     for(int month = 1; month <= t;month++){
-        // calc_depth({enter, 0}, board);
-
         // 通常植付フェーズ
         for(auto itr = data[month].rbegin(); itr != data[month].rend(); itr++){
             auto c = *itr;
@@ -330,81 +322,49 @@ void solve() {
             Pos option = {-1, -1};
             int perf = 1e5;
 
-            queue<Pos> que;
-            que.push({enter, 0});
-            fill(isChecked.begin(), isChecked.end(), vector<bool>(w, false));
-            isChecked[enter][0] = true;
-            while(!que.empty()){
-                auto p = que.front();
-                que.pop();
-                if(is_placable({p.h, p.w}, lowlink.articulation_point, c.first, board)){
-                    int t_v = calcu_value(c.second, {p.h, p.w}, board);
-                    if(chmin(perf, t_v)){
-                        option = {p.h, p.w};
-                    }else if(perf == t_v){
-                        if(depth[p.h][p.w] > depth[option.h][option.w]){
-                            option = {p.h, p.w};
+            rep(i, h){
+                rep(j, w){
+                    if(is_placable({i, j}, lowlink.articulation_point, c.first, board)){
+                        int t_v = calcu_value(c.second, {i, j}, board);
+                        if(chmin(perf, t_v)){
+                            option = {i, j};
+                        }else if(perf == t_v){
+                            if(depth[i][j] < depth[option.h][option.w]){
+                                option = {i, j};
+                            }
                         }
-                    }
-                }         
-                rep(i, 4){
-                    if(!is_through(p, i)) continue;
-
-                    int new_h = p.h + dy[i];
-                    int new_w = p.w + dx[i];
-                    if(isChecked[new_h][new_w]) continue;
-                    // boardのチェック
-                    int crop_num = board[new_h][new_w];
-                    if (crop_num == -1) {
-                        que.push({new_h, new_w});
-                        isChecked[new_h][new_w] = true;
-                    }
+                    }         
                 }
             }
             if(option.h != -1){
                 board[option.h][option.w] = c.second;
-                remove_lowlink_edge(option, lowlink, board);
-                // calc_depth({enter, 0}, board);
+                remove_lowlink_edge(option, lowlink, board, true);
                 ans.push_back({c.second, option, month});
                 is_planted[c.second - 1] = true;
             }
         }
 
         //収穫
-        queue<Pos> que;
-        que.push({enter, 0});
 
-        fill(isChecked.begin(), isChecked.end(), vector<bool>(w, false));
-        while(!que.empty()){
-            auto p = que.front();
-            que.pop();
-            rep(i, 4){
-                if(!is_through(p, i)) continue;
-
-                int new_h = p.h + dy[i];
-                int new_w = p.w + dx[i];
-                if(isChecked[new_h][new_w]) continue;
-                // boardのチェック
-                int crop_num = board[new_h][new_w];
-                if (crop_num == -1) {
-                    que.push({new_h, new_w});
-                    isChecked[new_h][new_w] = true;
-                }else if(sd[crop_num-1][1] <= month){
-                    board[new_h][new_w] = -1;
-                    add_lowlink_edge({new_h, new_w}, lowlink, board);
-                    que.push({new_h, new_w});
-                    isChecked[new_h][new_w] = true;
+        rep(i, h){
+            rep(j, w){
+                if(board[i][j] == -1) continue;
+                if(sd[board[i][j] - 1][1] <= month) {
+                    board[i][j] = -1;
+                    add_lowlink_edge({i, j}, lowlink, board, false);
                 }
             }
         }
+        lowlink.build();
     }
 
     print(ans.size());
     rep(i, ans.size()){
         print(ans[i].i<< " " << ans[i].p.h << " " << ans[i].p.w << " " <<ans[i].s);
     }
-
-
+    auto end = std::chrono::system_clock::now();
+    double elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(end-start).count();
+    print(elapsed << " ms.");
 }
 
 signed main() {
