@@ -233,7 +233,7 @@ int calcu_value(int crop_num, Pos p, vector<vector<int>> bd){
             int nh = p.h + dy[i], nw = p.w + dx[i];
             if(bd[nh][nw] == -1) {
                 value += max(0LL, 50 - depth[p.h][p.w]);
-            } else value += abs(sd[crop_num - 1][1] - sd[bd[nh][nw] - 1][1]) * 2;
+            } else value += abs(sd[crop_num - 1][1] - sd[bd[nh][nw] - 1][1]);
         }else{
             value += max(0LL, 25 - proceed_day);
         }
@@ -263,70 +263,6 @@ void remove_lowlink_edge(Pos p, LowLink &ll, vector<vector<int>> &bd, bool isUpd
     if(isUpdate)ll.build();
 }
 
-int calc_board_value(vector<vector<int>> &bd){
-    int sum = 0;
-    rep(i, h){
-        rep(j, w){
-            if(bd[i][j] == -1) {
-                sum += 100;
-                continue;
-            }
-            rep(r, 4){
-                if(is_through({i, j}, r)){
-                    if(bd[i + dy[r]][j + dx[r]] != -1){
-                        sum += abs(sd[bd[i][j]-1][1] - sd[bd[i + dy[r]][j + dx[r]]-1][1]);
-                    }
-                } 
-            }
-        }
-    }
-    return sum;
-}
-
-int  monte_carlo_simulation(vector<vector<int>> &bd, vector<pair<int, int>> &data, LowLink &ll){
-    // シミュレーションをして盤面の価値を返す関数
-    // 明日の俺が実装してくれるらしい
-
-    // ↑ は？死ねやカス
-    
-    int TURN = 10;
-    vector<Pos> changed; // 変更された座標を持つ 最終的に全部-1に戻す
-    for(int idx = data.size() - 1; idx >= 0 && TURN >= 0; idx--){
-        TURN--;
-        auto c = data[idx];
-        Pos option = {-1, -1};
-        int perf = 1e5;
-        rep(i, h){
-            rep(j, w){
-                if(is_placable({i, j}, ll.articulation_point, c.first, bd)){
-                    int t_v = calcu_value(c.second, {i, j}, bd);
-                    if(chmin(perf, t_v)){
-                        option = {i, j};
-                    }else if(perf == t_v){
-                        if(depth[i][j] < depth[option.h][option.w]){
-                            option = {i, j};
-                        }
-                    }
-                }         
-            }
-        }
-
-        if(option.h != -1){
-            board[option.h][option.w] = c.second;
-            changed.push_back(option);
-            remove_lowlink_edge(option, ll, bd, true);
-        }
-    }
-    int value = calc_board_value(bd);
-
-    //終了処理
-    rep(i, changed.size()){
-        bd[changed[i].h][changed[i].w] = -1;
-        add_lowlink_edge(changed[i], ll, bd, false);
-    }
-    ll.build();
-    return value;
-}
 
 void solve() {
     // hogehoge
@@ -337,6 +273,9 @@ void solve() {
 
     vector<vector<bool>> isChecked(h, vector<bool>(w, false));
 
+/*     std::mt19937 generator;
+    generator.seed(std::random_device()());
+    std::uniform_int_distribution<int> distribution(0, h-1); */
 
     rep(i, h-1){
         string s;
@@ -372,48 +311,32 @@ void solve() {
 
     for(int month = 1; month <= t;month++){
         // 通常植付フェーズ
-        for(int idx = data[month].size() - 1; idx >= 0 ; idx--){
+        for(auto itr = data[month].rbegin(); itr != data[month].rend(); itr++){
+            auto c = *itr;
 
-            auto c = data[month][idx];
-            vector<pair<int, Pos>> candidate;
+            Pos option = {-1, -1};
+            int perf = 1e5;
 
             rep(i, h){
                 rep(j, w){
                     if(is_placable({i, j}, lowlink.articulation_point, c.first, board)){
-                        candidate.push_back({calcu_value(c.second, {i, j}, board), {i, j}});
+                        int t_v = calcu_value(c.second, {i, j}, board);
+                        if(chmin(perf, t_v)){
+                            option = {i, j};
+                        }else if(perf == t_v){
+                            if(depth[i][j] < depth[option.h][option.w]){
+                                option = {i, j};
+                            }
+                        }
                     }         
                 }
             }
-            sort(candidate.begin(), candidate.end(), [](pair<int, Pos>&a, pair<int, Pos> &b){
-                return a.first < b.first;
-            });
-
-            if(candidate.size() == 1 ||(month >= 40 && candidate.size() > 0)){
-                board[candidate[0].second.h][candidate[0].second.w] = c.second;
-                remove_lowlink_edge(candidate[0].second, lowlink, board, true);
-                ans.push_back({c.second, candidate[0].second, month});
+            if(option.h != -1){
+                board[option.h][option.w] = c.second;
+                remove_lowlink_edge(option, lowlink, board, true);
+                ans.push_back({c.second, option, month});
                 is_planted[c.second - 1] = true;
-                if(data[month].size() != 0) data[month].pop_back();
-                continue;
-            }else if(candidate.size() == 0){
-                if(data[month].size() != 0) data[month].pop_back();
-                continue;
             }
-
-            if(data[month].size() != 0) data[month].pop_back();
-
-            int index = 0;
-            int v = INF;
-            rep(i, min(3LL, (int)candidate.size())){
-                board[candidate[i].second.h][candidate[i].second.w] = c.second;
-                if(chmin(v, monte_carlo_simulation(board, data[month], lowlink))){
-                    index = i;
-                }
-                board[candidate[i].second.h][candidate[i].second.w] = -1;
-            }
-            board[candidate[index].second.h][candidate[index].second.w] = c.second;
-            remove_lowlink_edge(candidate[index].second, lowlink, board, true);
-            ans.push_back({c.second, candidate[index].second, month});
         }
 
         //収穫
@@ -445,3 +368,4 @@ signed main() {
     while (times--) solve();
     return 0;
 }
+
