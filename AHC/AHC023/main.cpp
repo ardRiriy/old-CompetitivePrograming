@@ -200,7 +200,7 @@ bool is_placable(Pos p, vector<int> &v, int proceed_day, vector<vector<int>> &bd
         if(bd[next.h][next.w] == -1) continue;
         if(proceed_day > sd[bd[next.h][next.w]-1][1]){
             bd[p.h][p.w] = 100;
-            calc_depth({enter, 0}, bd);
+            // calc_depth({enter, 0}, bd);
             bool flag = false;
             rep(r, 4){
                 if(!is_through(next, r)) continue;
@@ -321,7 +321,7 @@ void solve() {
     vector<bool> is_planted(k, false);
 
     for(int month = 1; month <= t;month++){
-        calc_depth({enter, 0}, board);
+        // calc_depth({enter, 0}, board);
 
         // 通常植付フェーズ
         for(auto itr = data[month].rbegin(); itr != data[month].rend(); itr++){
@@ -364,7 +364,7 @@ void solve() {
             if(option.h != -1){
                 board[option.h][option.w] = c.second;
                 remove_lowlink_edge(option, lowlink, board);
-                calc_depth({enter, 0}, board);
+                // calc_depth({enter, 0}, board);
                 ans.push_back({c.second, option, month});
                 is_planted[c.second - 1] = true;
             }
