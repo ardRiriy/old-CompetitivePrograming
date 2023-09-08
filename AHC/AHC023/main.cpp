@@ -228,19 +228,14 @@ int calcu_value(int crop_num, Pos p, vector<vector<int>> bd){
     int proceed_day = sd[crop_num - 1][1] - sd[crop_num - 1][0];
     int value = 0;
 
-    // 小さい数字は手前に入ってほしいという気持ちをこめている
-    // if(proceed_day <= 7) value += pow(depth[p.h][p.w], 2);
-
     rep(i, 4){
         if(is_through(p, i)){
             int nh = p.h + dy[i], nw = p.w + dx[i];
             if(bd[nh][nw] == -1) {
-                if(proceed_day > 7){
-                    value += proceed_day;
-                }else{
-                    value += depth[p.h][p.w];
-                }
+                value += max(0LL, 50 - depth[p.h][p.w]);
             } else value += abs(sd[crop_num - 1][1] - sd[bd[nh][nw] - 1][1]);
+        }else{
+            value += max(0LL, 25 - proceed_day);
         }
     }
     return value;
@@ -362,9 +357,6 @@ void solve() {
     rep(i, ans.size()){
         print(ans[i].i<< " " << ans[i].p.h << " " << ans[i].p.w << " " <<ans[i].s);
     }
-    auto end = std::chrono::system_clock::now();
-    double elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(end-start).count();
-    print(elapsed << " ms.");
 }
 
 signed main() {
