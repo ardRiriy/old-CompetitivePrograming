@@ -226,7 +226,7 @@ int manhattan_distance_from_wall(Pos p){
 
 int calcu_value(int crop_num, Pos p, vector<vector<int>> bd){
     int proceed_day = sd[crop_num - 1][1] - sd[crop_num - 1][0];
-    int value = abs((double)depth[p.h][p.w] - proceed_day * 1.5);
+    int value = pow(depth[p.h][p.w] - proceed_day * 1.5, 2);
 
     rep(i, 4){
         if(is_through(p, i)){
