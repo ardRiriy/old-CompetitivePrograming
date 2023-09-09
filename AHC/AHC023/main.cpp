@@ -226,7 +226,7 @@ int manhattan_distance_from_wall(Pos p){
 
 int calcu_value(int crop_num, Pos p, vector<vector<int>> bd){
     int proceed_day = sd[crop_num - 1][1] - sd[crop_num - 1][0];
-    int value = abs(depth[p.h][p.w] - proceed_day * 1.5);
+    int value = abs((double)depth[p.h][p.w] - proceed_day * 1.5);
 
     rep(i, 4){
         if(is_through(p, i)){
@@ -235,8 +235,7 @@ int calcu_value(int crop_num, Pos p, vector<vector<int>> bd){
                 value += max(0LL, 50 - depth[p.h][p.w]);
             } else value += abs(sd[crop_num - 1][1] - sd[bd[nh][nw] - 1][1]);
         }else{
-            if(proceed_day < 8)
-                value += 100;
+            if(proceed_day < 10) value += 100;
         }
     }
     return value;
@@ -325,7 +324,7 @@ void solve() {
                         if(chmin(perf, t_v)){
                             option = {i, j};
                         }else if(perf == t_v){
-                            if(depth[i][j] < depth[option.h][option.w]){
+                            if(depth[i][j] > depth[option.h][option.w]){
                                 option = {i, j};
                             }
                         }
