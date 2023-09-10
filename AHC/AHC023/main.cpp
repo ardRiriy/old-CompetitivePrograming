@@ -189,8 +189,10 @@ void calc_depth(Pos start, vector<vector<int>>&bd){
     }
 }
 
-bool is_placable(Pos p, vector<int> &v, int proceed_day, vector<vector<int>> &bd){
+
+bool is_placable(Pos p, vector<int> &v, int proceed_day, vector<vector<int>> &bd, int crop_num){
     if(bd[p.h][p.w] != -1 || depth[p.h][p.w] == INF || (p.h == enter && p.w ==  0)) return false;
+    for(auto i: v) if(p.h * w + p.w == i) return false;
 
     rep(i, 4){
         if(!is_through(p, i)) continue;
@@ -198,14 +200,29 @@ bool is_placable(Pos p, vector<int> &v, int proceed_day, vector<vector<int>> &bd
         next.h = p.h + dy[i], next.w =p.w + dx[i];
         if(bd[next.h][next.w] == -1) continue;
         if(proceed_day > sd[bd[next.h][next.w]-1][1]){
-            bd[p.h][p.w] = 100;
+            bd[p.h][p.w] = crop_num;
             bool flag = false;
-            rep(r, 4){
-                if(!is_through(next, r)) continue;
-                Pos nn = next;
-                nn.h += dy[r];
-                nn.w += dx[r];
-                if(bd[nn.h][nn.w] == -1) flag = true;                
+
+            vector<vector<bool>> ck(h, vector<bool>(w, false));
+            queue<Pos> stk;
+            stk.push(next);
+            ck[next.h][next.w] = true;
+            while(!stk.empty()){
+                auto p = stk.front();
+                stk.pop();
+                rep(r, 4){
+                    if(is_through(p, r) && !ck[p.h + dy[r]][p.w + dx[r]]){
+                        // -1ならtrue
+                        if(bd[p.h + dy[r]][p.w + dx[r]] == -1) {
+                            flag = true;
+                            break;
+                        }else if(sd[bd[p.h + dy[r]][p.w + dx[r]] - 1][1] <= sd[bd[p.h][p.w] - 1][1]){
+                            stk.push({p.h + dy[r], p.w + dx[r]});
+                            ck[p.h + dy[r]][p.w + dx[r]] = true;
+                        }
+                    }
+                }
+                if(flag) break;
             }
             if(!flag) {
                 bd[p.h][p.w] = -1;
@@ -215,7 +232,7 @@ bool is_placable(Pos p, vector<int> &v, int proceed_day, vector<vector<int>> &bd
     }
     bd[p.h][p.w] = -1;
 
-    for(auto i: v) if(p.h * w + p.w == i) return false;
+    
     return true;
 }
 
@@ -226,16 +243,21 @@ int manhattan_distance_from_wall(Pos p){
 
 int calcu_value(int crop_num, Pos p, vector<vector<int>> bd){
     int proceed_day = sd[crop_num - 1][1] - sd[crop_num - 1][0];
-    int value = pow(depth[p.h][p.w] - proceed_day * 1.5, 2);
+    int value = 0;
+
+    // 小さい数字は手前に入ってほしいという気持ちをこめている
+    // if(proceed_day <= 7) value += pow(depth[p.h][p.w], 2);
 
     rep(i, 4){
         if(is_through(p, i)){
             int nh = p.h + dy[i], nw = p.w + dx[i];
             if(bd[nh][nw] == -1) {
-                value += max(0LL, 50 - depth[p.h][p.w]);
+                if(proceed_day > 7){
+                    value += proceed_day;
+                }else{
+                    value += depth[p.h][p.w];
+                }
             } else value += abs(sd[crop_num - 1][1] - sd[bd[nh][nw] - 1][1]);
-        }else{
-            if(proceed_day < 10) value += 100;
         }
     }
     return value;
@@ -319,12 +341,12 @@ void solve() {
 
             rep(i, h){
                 rep(j, w){
-                    if(is_placable({i, j}, lowlink.articulation_point, c.first, board)){
+                    if(is_placable({i, j}, lowlink.articulation_point, c.first, board, c.second)){
                         int t_v = calcu_value(c.second, {i, j}, board);
                         if(chmin(perf, t_v)){
                             option = {i, j};
                         }else if(perf == t_v){
-                            if(depth[i][j] > depth[option.h][option.w]){
+                            if(depth[i][j] >= depth[option.h][option.w]){
                                 option = {i, j};
                             }
                         }
