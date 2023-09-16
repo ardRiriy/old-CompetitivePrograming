@@ -24,22 +24,52 @@ int b_search(vector<int>& v, int k) { int ng = -1, ok = v.size(); while (abs(ng 
 
 void solve() {
     // hogehoge
-    int n;
-    cin >> n;
-    string s = "";
+    int n, m;
+    cin >> n >> m;
+    
+    vector<int> ans(n, 0);
 
-    rep(i, n+1){
-        bool flag = false;
-        rep(j, 9){
-            if( n % (j + 1) == 0 && i % (n / (j + 1)) == 0){
-                flag = true;
-                s.push_back('0' + (j + 1));
-                break;
+    priority_queue<
+    pair<int, int>,
+    vector<pair<int, int>>,
+    greater<pair<int, int>>
+    > event;
+    priority_queue<int, vector<int>, greater<int>> que;
+
+    map<int, vector<int>> wait; // wait[index] = 帰ってくる人 
+
+    vector<int> t(m), w(m), s(m);
+    rep(i, m){
+        cin >> t[i] >> w[i] >> s[i];
+        event.push({t[i], i + 1});
+        event.push({t[i] + s[i], -(i + 1)});
+    }
+
+    rep(i, n) que.push(i);
+
+
+    while(!event.empty()){
+        auto p = event.top();
+        event.pop();
+        
+        if(p.second > 0){
+            //print(1 << " " << p.second - 1);
+            if(!que.empty()){
+                int hito = que.top();
+                que.pop();
+                
+                ans[hito] += w[p.second - 1];
+                wait[p.second - 1].push_back(hito);
+            }
+        }else{
+            //print(2 << " " << -p.second - 1);
+            for(int i: wait[-p.second - 1]){
+                que.push(i);
             }
         }
-        if(!flag) s.push_back('-');
     }
-    print(s);
+
+    rep(i, n) print(ans[i]);
 }
 
 signed main() {

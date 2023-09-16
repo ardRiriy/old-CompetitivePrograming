@@ -24,22 +24,44 @@ int b_search(vector<int>& v, int k) { int ng = -1, ok = v.size(); while (abs(ng 
 
 void solve() {
     // hogehoge
-    int n;
-    cin >> n;
-    string s = "";
+    int m;
+    cin >> m;
+    map<char, vector<int>> m1, m2, m3;
 
-    rep(i, n+1){
-        bool flag = false;
-        rep(j, 9){
-            if( n % (j + 1) == 0 && i % (n / (j + 1)) == 0){
-                flag = true;
-                s.push_back('0' + (j + 1));
-                break;
+    string s1, s2, s3;
+    cin >> s1 >> s2 >> s3;
+
+    rep(i, m){
+        m1[s1[i]].push_back(i);
+        m2[s2[i]].push_back(i);
+        m3[s3[i]].push_back(i);
+    }
+
+    int ans = INF;
+
+    for(char d = '0'; d <= '9'; ++d){
+        for(int t1: m1[d]){
+            for(int t2: m2[d]){
+                for(int t3: m3[d]){
+                    vector<int> times = {t1, t2, t3};
+                    sort(times.begin(), times.end());
+
+                    long long total_time = times[0];
+                    for (int i = 1; i < 3; ++i) {
+                        if (times[i] == times[i - 1]) {
+                            total_time += m;
+                        } else {
+                            total_time = max(total_time, times[i]);
+                        }
+                    }
+
+                    chmin(ans, total_time);
+                }
             }
         }
-        if(!flag) s.push_back('-');
     }
-    print(s);
+    if(ans != INF)print(ans);
+    else print(-1);
 }
 
 signed main() {

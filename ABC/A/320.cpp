@@ -24,22 +24,9 @@ int b_search(vector<int>& v, int k) { int ng = -1, ok = v.size(); while (abs(ng 
 
 void solve() {
     // hogehoge
-    int n;
-    cin >> n;
-    string s = "";
-
-    rep(i, n+1){
-        bool flag = false;
-        rep(j, 9){
-            if( n % (j + 1) == 0 && i % (n / (j + 1)) == 0){
-                flag = true;
-                s.push_back('0' + (j + 1));
-                break;
-            }
-        }
-        if(!flag) s.push_back('-');
-    }
-    print(s);
+    int a, b;
+    cin >> a >> b;
+    print(power(a, b) + power(b, a));
 }
 
 signed main() {

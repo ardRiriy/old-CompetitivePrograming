@@ -24,22 +24,44 @@ int b_search(vector<int>& v, int k) { int ng = -1, ok = v.size(); while (abs(ng 
 
 void solve() {
     // hogehoge
-    int n;
-    cin >> n;
-    string s = "";
+    int n, m;
+    cin >> n >> m;
+    map<int, vector<pair<int, int>>> mp;
 
-    rep(i, n+1){
-        bool flag = false;
-        rep(j, 9){
-            if( n % (j + 1) == 0 && i % (n / (j + 1)) == 0){
-                flag = true;
-                s.push_back('0' + (j + 1));
-                break;
-            }
-        }
-        if(!flag) s.push_back('-');
+    vector<pair<int, int>> pos(2 * m);
+
+    for(int i = 0; i < 2 * m; i += 2){
+        int a, b;
+        cin >> a >> b >> pos[i].first >> pos[i].second;
+        pos[i+1] = {-pos[i].first, -pos[i].second};
+        a--;
+        b--;
+        mp[a].push_back({b, i});
+        mp[b].push_back({a, i+1});
     }
-    print(s);
+
+    vector<pair<int, int>> ans(n);
+    vector<bool> ck(n, false);
+    ans[0] = {0, 0};
+    ck[0] = true;
+    queue<int> que;
+    que.push(0);
+    while (!que.empty()){
+        auto p = que.front();
+        que.pop();
+        rep(i, mp[p].size()){
+            if(ck[mp[p][i].first]) continue;
+            ck[mp[p][i].first] = true;
+            ans[mp[p][i].first] = {ans[p].first + pos[mp[p][i].second].first, ans[p].second + pos[mp[p][i].second].second};
+            que.push(mp[p][i].first);
+        }
+    }
+
+    rep(i, n){
+        if(!ck[i]) print("undecidable");
+        else print(ans[i].first << " " << ans[i].second);
+    }
+    
 }
 
 signed main() {
