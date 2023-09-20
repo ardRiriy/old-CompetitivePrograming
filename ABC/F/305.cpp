@@ -1,67 +1,78 @@
 #include <bits/stdc++.h>
-
 #define int long long
 #define rep(i, n) for (int i = 0; i < (int)(n); i++)
-#define YES cout << "Yes" << endl;
-#define NO cout << "No" << endl;
+#define revrep(i, n) for (int i = (int)(n); i >= 0; i--)
+#define itrep(itr, stl) for(auto itr = stl.begin(); itr != stl.end(); itr++)
+#define Vec2D(type, n, m, val) vector<vector<type>>(n, vector<type>(m, val))
+#define print(x) cout << x << endl
+#define all(a) a.begin(), a.end()
 const int INF = LLONG_MAX;
 const int N_INF = LLONG_MIN;
-
 using namespace std;
-bool chmin(int &a, int b) {
-    if (a > b) {
-        a = b;
-        return true;
+class UnionFind { 
+    private: map<int, int> uf;
+    public:
+    int root(int n) { if (uf.find(n) == uf.end()) uf[n] = -1; if (uf[n] < 0) return n; else return uf[n] = root(uf[n]); }
+    bool connected(int a, int b) { return root(a) == root(b); }
+    void marge(int a, int b) { int root_a = root(a); int root_b = root(b); if (root_a != root_b) { if (uf[root_a] > uf[root_b]) swap(root_a, root_b); uf[root_a] += uf[root_b]; uf[root_b] = root_a; }}
+    int size(int n) { return -uf[root(n)]; }
+};
+bool chmin(int &a, int b) { if (a > b) { a = b; return true; } return false; }
+bool chmax(int &a, int b) { if (a < b) { a = b; return true; } return false; }
+int power(int x, int n) { int result = 1; while(n > 0){ if((n & 1) == 1){ result *= x; } x *= x; n >>= 1; } return result; } /*x^nを計算*/
+int b_search(vector<int>& v, int k) { int ng = -1, ok = v.size(); while (abs(ng - ok) > 1) { int mid = ok + (ng - ok) / 2; if (v[mid] >= k) ok = mid; else ng = mid; } return ok; }
+
+
+int n, m;
+vector<bool> ck;
+
+void dfs(int now, int prev){
+    if(now == n-1) return;
+    
+    int k;
+    cin >> k;
+    vector<int> v(k);
+    rep(i, k) {cin >> v[i]; v[i]--;}
+
+    for(int i: v){
+        if(ck[i]) continue;
+        else {
+            ck[i] = true;
+            print(i + 1);
+            if(i + 1 == n){
+                string s;
+                cin >> s;
+                exit(0);
+            }
+            dfs(i, now);
+        }
     }
-    return false;
+    print(prev + 1);
+    int t;
+    cin >> t;
+    rep(_, t){
+        int __;
+        cin >> __;
+    }
 }
 
-bool chmax(int &a, int b) {
-    if (a < b) {
-        a = b;
-        return true;
-    }
-    return false;
+
+void solve() {
+    // hogehoge
+    
+    cin >> n >> m;
+    ck.resize(n, false);
+    ck[0] = true;
+    dfs(0, -1);
+
 }
 
 signed main() {
     std::cout << std::fixed;
     std::cout << std::setprecision(20);
-    int N, M;
-    cin >> N >> M;
-    vector<bool> vec(N + 2, false);
-    stack<int> stk;
-    vec[1] = true;
-    int tmp;
-    cin >> tmp;
-    rep(i, tmp) {
-        int q;
-        cin >> q;
-        vec[q] = true;
-        stk.push(q);
-    }
-
-    while (!stk.empty()) {
-        int p = stk.top();
-        stk.pop();
-        if (p == N) {
-            cout << p << endl;
-            string s;
-            cin >> s;
-            return 0;
-        }
-        cout << p << endl;
-        int k;
-        cin >> k;
-        rep(i, k) {
-            int q;
-            cin >> q;
-            if (!vec[q]) {
-                vec[q] = true;
-                stk.push(q);
-            }
-        }
-    }
-
+    std::cin.tie(0)->sync_with_stdio(0);
+    int times = 1;
+    // cin >> times;
+    while (times--) solve();
     return 0;
 }
