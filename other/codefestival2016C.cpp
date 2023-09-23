@@ -5,7 +5,8 @@
 #define itrep(itr, stl) for(auto itr = stl.begin(); itr != stl.end(); itr++)
 #define Vec2D(type, n, m, val) vector<vector<type>>(n, vector<type>(m, val))
 #define print(x) cout << x << endl
-#define all(a) a.begin(), a.end()
+#define all(stl) a.begin(), a.end()
+#define revall(stl) a.rbegin(), a.rend()
 const int INF = LLONG_MAX;
 const int N_INF = LLONG_MIN;
 using namespace std;
@@ -24,6 +25,24 @@ int b_search(vector<int>& v, int k) { int ng = -1, ok = v.size(); while (abs(ng 
 
 void solve() {
     // hogehoge
+    int k, t;
+    cin >> k >> t;
+    vector<int> a(t);
+    rep(i, t) cin >> a[i];
+    
+
+    int cake_num = t;
+    while(t > 1){
+        sort(revall(a));
+        a[0] -= a[1];
+        a[1] = 0;
+
+        t--;
+        if(a[0] == 0) t--; 
+    } 
+    sort(revall(a));
+    if(a[0] == 0) print(0);
+    else print(a[0] - 1);
 }
 
 signed main() {

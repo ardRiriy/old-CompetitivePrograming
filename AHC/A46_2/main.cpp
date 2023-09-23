@@ -4,7 +4,7 @@
 #define print(x) cout << x << endl
 const int INF = LLONG_MAX;
 const int N_INF = LLONG_MIN;
-const int LMT = 990; // ミリ秒指定
+const int LMT = 10000; // ミリ秒指定
 
 using namespace std;
 
@@ -40,17 +40,11 @@ double culc_score(vector<int> &vec){
     return sum;
 }
 
-double culc_diff_score(vector<int> &vec, int a, int b){
-    double score = distance(city[vec[a]], city[vec[a+1]]) + distance(city[vec[a]], city[vec[a-1]]) + distance(city[vec[b]], city[vec[b+1]]) + distance(city[vec[b]], city[vec[b-1]]);
+double culc_diff_score(vector<int> &vec, int a, int b, int n){
+    double score = distance(city[vec[a]], city[vec[(a+1) % n]]) + distance(city[vec[a]], city[vec[(a-1+n)%n]]) + distance(city[vec[b]], city[vec[(b+1)%n]]) + distance(city[vec[b]], city[vec[(b-1+n)%n]]);
     return score;
 }
 
-unsigned int randxor()
-{
-    static unsigned int x=123456789,y=362436069,z=521288629,w=88675123;
-    unsigned int t;
-    t=(x^(x<<11));x=y;y=z;z=w; return( w=(w^(w>>19))^(t^(t>>8)) );
-}
 
 void solve() {
     // hogehoge
@@ -88,30 +82,36 @@ void solve() {
         now_idx = next_index;
         ck[next_index] = true;
     }
-    ans.push_back(0);
-    // print("貪欲: " << 1000000 / culc_score(ans));
+    
+    //print("貪欲: " << 1000000 / culc_score(ans));
+    
+    std::mt19937 generator;
+    generator.seed(std::random_device()());
+    std::uniform_int_distribution<int> distribution(0, n-1);
+    std::uniform_int_distribution<int> rnd(0, 32767);
 
     // 焼く
-    double start_tmp = 5, end_tmp = 0;
+    double start_tmp = 15, end_tmp = 3;
     while(true){
         now = std::chrono::system_clock::now();
         double elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(now-start).count(); //処理に要した時間をミリ秒に変換
         if(elapsed > LMT) break;
 
-        int a = randxor() % (n-1) + 1;
-        int b = a;
-        while(b == a) b = randxor() % (n-1) + 1;
-        int pre_score = culc_diff_score(ans, a, b);
+        int a = distribution(generator);
+        int b = distribution(generator);
+        if(a == b || a == 0 || b == 0) continue;
+        int pre_score = culc_diff_score(ans, a, b, n);
         swap(ans[a], ans[b]);
-        int new_score = culc_diff_score(ans, a, b);
+        int new_score = culc_diff_score(ans, a, b, n);
 
         double temp = start_tmp + (end_tmp - start_tmp) * (elapsed) / LMT;
         double prob = exp((pre_score-new_score)/temp);
 
-        if(!(prob > (rand()%INF)/(double)INF)){
+        if(!(prob > (rnd(generator)%INF)/(double)INF)){
             swap(ans[a], ans[b]);
         }
     }
+    ans.push_back(0);
     print_ans(ans);
     //print("END : " << 1000000 / culc_score(ans));
 }
