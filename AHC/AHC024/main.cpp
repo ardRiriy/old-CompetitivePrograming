@@ -166,7 +166,7 @@ void solve() {
             int nj = j + dx[r];
             if(abs(i - 25) + abs(j - 25) >= abs(ni - 25) + abs(nj - 25))
             if(isInsideArea(n, ni, nj)){
-                if(bd[ni][nj] == 0 || bd[ni][nj] == bd[i][j]) continue;
+                if((bd[ni][nj] == 0 && distribution(generator) % 5 != 0)|| bd[ni][nj] == bd[i][j]) continue;
 
                 vector<int> old_adj;
                 bool flag = true;
@@ -188,7 +188,7 @@ void solve() {
                 }
             }
         }
-        if(cnt % (int)5e4 == 1) print_grid(bd);
+        if(cnt % (int)1e4 == 1) print_grid(bd);
     }
 
     print_grid(bd);
